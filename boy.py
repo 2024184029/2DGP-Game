@@ -1,4 +1,4 @@
-from pico2d import load_image
+from pico2d import load_image, draw_rectangle
 from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK_UP, SDLK_DOWN
 
 import game_world
@@ -129,6 +129,7 @@ class Boy:
     def __init__(self):
         self.x, self.y = 360, 150
         self.frame = 0
+        self.scale = 1.0
 
         self.dx = 0 # 이동상태
         self.dy = 0
@@ -160,3 +161,10 @@ class Boy:
 
     def draw(self):
         self.state_machine.draw()
+
+        draw_rectangle(*self.get_bb())
+
+    # 충돌 처리
+    def get_bb(self):
+        half = 100 * self.scale
+        return self.x - half + 85, self.y - half + 60, self.x + half - 80, self.y + half - 70

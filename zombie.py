@@ -1,4 +1,4 @@
-from pico2d import load_image, get_time
+from pico2d import *
 import game_world
 from state_machine import StateMachine
 import random
@@ -20,6 +20,7 @@ class Zombie:
     def __init__(self):
         self.image = load_image('zombie.png')
         self.frame = 0
+        self.scale = 1.0
         self.x, self.y = randint(100, 1000), randint(100, 1000)
         dx, dy = choice([(1, 0), (-1, 0), (0, 1), (0, -1)]) # 시작 4방향 중 하나 (오, 왼, 위, 아래)
         self.next_turn = get_time() + 1.5 #1.5초마다 자동 방향 전환
@@ -60,4 +61,12 @@ class Zombie:
         # sy = (self.frame // FRAME_COUNT) * 200
         sy = self.row * 200
         self.image.clip_draw(sx, sy, 100, 200, self.x, self.y)
+
+        # bb 보이게 함
+        draw_rectangle(*self.get_bb())
+
+    # 충돌 처리
+    def get_bb(self):
+        half = 100 * self.scale
+        return self.x - half + 70, self.y - half, self.x + half - 70, self.y + half - 40
 
