@@ -5,8 +5,11 @@ import game_world
 from state_machine import StateMachine
 
 # 캐릭터 스프라이트 정보
-FRAME_COLS = 3
-FRAME_ROWS = 4
+FRAME_COLS = 4
+FRAME_ROWS = 3
+IDLE_ROW = 0           # Idle 프레임이 있는 행(맨 위)
+RUN_ROW  = 1           # Run 프레임이 있는 행(그 다음 행)
+SPEED = 5
 
 # 미션 해결을 위한 이벤트 (나중에 구현)
 # def space_down(e): # e is space down ?
@@ -51,26 +54,34 @@ class Idle:
 
     def __init__(self, boy):
         self.boy = boy
+        self.boy.dy = 0
+        self.boy.frame = 0
 
     def enter(self, e):
-        self.boy.wait_time = get_time()
-        self.boy.dir = 0
-
+        # self.boy.wait_time = get_time()
+        # self.boy.dir = 0
+        self.boy.dx = 0
+        self.boy.dy = 0
+        self.boy.frame = 0
 
     def exit(self, e):
         pass
 
-
     def do(self):
-        self.boy.frame = (self.boy.frame + 1) % 8
-        if get_time() - self.boy.wait_time > 3:
-            self.boy.state_machine.handle_state_event(('TIMEOUT', None))
+        self.boy.frame = (self.boy.frame + 1) % FRAME_COLS
+        # if get_time() - self.boy.wait_time > 3:
+        #     self.boy.state_machine.handle_state_event(('TIMEOUT', None))
 
     def draw(self):
-        if self.boy.face_dir == 1: # right
-            self.boy.image.clip_draw(self.boy.frame * 100, 300, 100, 100, self.boy.x, self.boy.y)
-        else: # face_dir == -1: # left
-            self.boy.image.clip_draw(self.boy.frame * 100, 200, 100, 100, self.boy.x, self.boy.y)
+        fw, fh = self.boy.fw, self.boy.fh
+        sx = self.boy.frame * fw
+        sy = IDLE_ROW * fh
+
+        # if self.boy.current_dir < 0: # right
+        #     self.boy.image.clip_draw(sx + fw, sy, -fw, fh, self.boy.x, self.boy.y)
+        # else: # face_dir == -1: # left
+        #     self.boy.image.clip_draw(sx, sy, fw, fh, self.boy.x, self.boy.y)
+        self.boy.image.clip_draw(sx, sy, fw, fh, self.boy.x, self.boy.y)
 
 
 
@@ -92,11 +103,27 @@ class Run:
         pass
 
     def do(self):
-        self.boy.frame = (self.boy.frame + 1) % 8
-        self.boy.x += self.boy.dir * 5
+        self.boy.frame = (self.boy.frame + 1) % FRAME_COLS
+
+        self.boy.x += self.boy.dx * SPEED
+        self.boy.y += self.boy.dy * SPEED
+
+        W, H = 1024, 1024
+        half_w, half_h = self.boy.fw // 2, self.boy.fh // 2
+        self.boy.x = max(half_w, min(self.boy.x, W - half_w))
+        self.boy.y = max(half_h, min(self.boy.y, H - half_h))
+
+        # 정지하면 IDLE 상태로 전환
+        if self.boy.dx == 0 and self.boy.dy == 0:
+            self.boy.state_machine.handle_state_event(('STOP', None))
 
     def draw(self):
-        if self.boy.face_dir == 1: # right
+        fw, fh = self.boy.fw, self.boy.fh
+        sx = (self.boy.frame % FRAME_COLS) * fw
+        sy = RUN_ROW * fh
+
+        # if self.boy.face_dir == 1: # right
+        if self.boy.current_dir < 0:
             self.boy.image.clip_draw(self.boy.frame * 100, 100, 100, 100, self.boy.x, self.boy.y)
         else: # face_dir == -1: # left
             self.boy.image.clip_draw(self.boy.frame * 100, 0, 100, 100, self.boy.x, self.boy.y)
@@ -104,20 +131,31 @@ class Run:
 
 class Boy:
     def __init__(self):
-        self.x, self.y = 400, 90
+        self.x, self.y = 400, 400
         self.frame = 0
-        self.face_dir = 1
-        self.dir = 0
+        # self.face_dir = 1
+        # self.dir = 0
+
+        self.dx = 0 # 이동상태
+        self.dy = 0
+        self.current_dir = 1
         self.image = load_image('boy.png')
+
+        self.fw = self.image.w // FRAME_COLS
+        self.fh = self.image.h // FRAME_ROWS
 
         self.IDLE = Idle(self)
         self.RUN = Run(self)
+
+        def is_stop(ev): return ev[0] == 'STOP'
         self.state_machine = StateMachine(
             self.IDLE,
             {
                 # self.SLEEP : {space_down: self.IDLE},
-                self.IDLE : {right_down: self.RUN, left_down: self.RUN, right_up: self.RUN, left_up: self.RUN},
-                self.RUN : {right_up: self.IDLE, left_up: self.IDLE, right_down: self.IDLE, left_down: self.IDLE}
+                self.IDLE : {right_down: self.RUN, left_down: self.RUN, up_down: self.RUN, down_down: self.RUN},
+                self.RUN : {right_down: self.RUN, left_down: self.RUN, up_down: self.RUN, down_down: self.RUN,
+                            right_up: self.RUN,   left_up: self.RUN,   up_up: self.RUN,   down_up: self.RUN,
+                            is_stop: self.IDLE}
             }
         )
 
@@ -126,7 +164,6 @@ class Boy:
 
     def handle_event(self, event):
         self.state_machine.handle_state_event(('INPUT', event))
-        pass
 
     def draw(self):
         self.state_machine.draw()

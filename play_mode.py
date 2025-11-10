@@ -2,9 +2,11 @@ import game_framework
 import title_mode
 from pico2d import *
 from boy import Boy
+from background import Background
 import game_world
 
 running = True
+image = None
 
 def pause():
     pass
@@ -25,9 +27,10 @@ def handle_events():
 
 
 def init():
+    background = Background()
+    game_world.add_object(background, 0)
+
     global boy
-
-
     boy = Boy()
     game_world.add_object(boy, 1)
 
