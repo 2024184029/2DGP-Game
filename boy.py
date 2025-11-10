@@ -1,4 +1,4 @@
-from pico2d import load_image, get_time
+from pico2d import load_image
 from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK_UP, SDLK_DOWN
 
 import game_world
@@ -9,7 +9,7 @@ FRAME_COLS = 4
 FRAME_ROWS = 3
 IDLE_ROW = 0           # Idle 프레임이 있는 행
 RUN_ROW  = 1           # Run 프레임이 있는 행
-SPEED = 1
+SPEED = 0.3
 
 # 미션 해결을 위한 이벤트 (나중에 구현)
 # def space_down(e): # e is space down ?
@@ -48,8 +48,6 @@ def down_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_DOWN
 
 
-
-
 class Idle:
 
     def __init__(self, boy):
@@ -69,10 +67,11 @@ class Idle:
         self.boy.frame = (self.boy.frame + 1) % FRAME_COLS
 
     def draw(self):
+        offset_x = [-15, -10, -5, 0, 0]  # 프레임별 중심 보정
         sx = (self.boy.frame % 4) * 100
-        sy = 0 # 첫번째 행
+        sy = 100 # 첫번째 행
 
-        self.boy.image.clip_draw(sx, sy, 100, 100, self.boy.x, self.boy.y)
+        self.boy.image.clip_draw(sx, sy, 100, 100, self.boy.x + offset_x[self.boy.frame], self.boy.y)
 
 
 
@@ -110,7 +109,7 @@ class Run:
 
     def draw(self):
         sx = (self.boy.frame % 5) * 100
-        sy = 100 # 두번째 행
+        sy = 200 # 두번째 행
 
         if self.boy.current_dir < 0:
             self.boy.image.clip_draw(sx+100, sy, 100, 100, self.boy.x, self.boy.y)
