@@ -67,9 +67,9 @@ class Idle:
         self.boy.frame = (self.boy.frame + 1) % FRAME_COLS
 
     def draw(self):
-        offset_x = [-15, -10, -5, 0, 0]  # 프레임별 중심 보정
+        offset_x = [-15, -10, -5, 0]  # 프레임별 중심 보정
         sx = (self.boy.frame % 4) * 100
-        sy = 100 # 첫번째 행
+        sy = 0 # 첫번째 행
 
         self.boy.image.clip_draw(sx, sy, 100, 100, self.boy.x + offset_x[self.boy.frame], self.boy.y)
 
@@ -108,13 +108,14 @@ class Run:
             self.boy.state_machine.handle_state_event(('STOP', None))
 
     def draw(self):
+        offset_x = [-14, -10, -5, 0, 5]
         sx = (self.boy.frame % 5) * 100
-        sy = 200 # 두번째 행
+        sy = 100 # 두번째 행
 
         if self.boy.current_dir < 0:
-            self.boy.image.clip_draw(sx+100, sy, 100, 100, self.boy.x, self.boy.y)
+            self.boy.image.clip_draw(sx+100, sy, 100, 100, self.boy.x + offset_x[self.boy.frame], self.boy.y)
         else: # face_dir == -1: # left
-            self.boy.image.clip_draw(sx, sy, 100, 100, self.boy.x, self.boy.y)
+            self.boy.image.clip_draw(sx, sy, 100, 100, self.boy.x + offset_x[self.boy.frame], self.boy.y)
 
 
 class Boy:
