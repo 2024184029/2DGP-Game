@@ -103,6 +103,13 @@ class Run:
         self.boy.x = max(half_w, min(self.boy.x, W - half_w))
         self.boy.y = max(half_h, min(self.boy.y, H - half_h))
 
+        if self.boy.dx != 0 and self.boy.dy != 0:
+            self.boy.x += (self.boy.dx * SPEED) / 1.5
+            self.boy.y += (self.boy.dy * SPEED) / 1.5
+        else:
+            self.boy.x += self.boy.dx * SPEED
+            self.boy.y += self.boy.dy * SPEED
+
         # 정지하면 IDLE 상태로 전환
         if self.boy.dx == 0 and self.boy.dy == 0:
             self.boy.state_machine.handle_state_event(('STOP', None))
