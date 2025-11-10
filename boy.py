@@ -7,9 +7,9 @@ from state_machine import StateMachine
 # 캐릭터 스프라이트 정보
 FRAME_COLS = 4
 FRAME_ROWS = 3
-IDLE_ROW = 0           # Idle 프레임이 있는 행(맨 위)
-RUN_ROW  = 1           # Run 프레임이 있는 행(그 다음 행)
-SPEED = 5
+IDLE_ROW = 0           # Idle 프레임이 있는 행
+RUN_ROW  = 1           # Run 프레임이 있는 행
+SPEED = 1
 
 # 미션 해결을 위한 이벤트 (나중에 구현)
 # def space_down(e): # e is space down ?
@@ -58,8 +58,6 @@ class Idle:
         self.boy.frame = 0
 
     def enter(self, e):
-        # self.boy.wait_time = get_time()
-        # self.boy.dir = 0
         self.boy.dx = 0
         self.boy.dy = 0
         self.boy.frame = 0
@@ -69,19 +67,12 @@ class Idle:
 
     def do(self):
         self.boy.frame = (self.boy.frame + 1) % FRAME_COLS
-        # if get_time() - self.boy.wait_time > 3:
-        #     self.boy.state_machine.handle_state_event(('TIMEOUT', None))
 
     def draw(self):
-        fw, fh = self.boy.fw, self.boy.fh
-        sx = self.boy.frame * fw
-        sy = IDLE_ROW * fh
+        sx = (self.boy.frame % 4) * 100
+        sy = 0 # 첫번째 행
 
-        # if self.boy.current_dir < 0: # right
-        #     self.boy.image.clip_draw(sx + fw, sy, -fw, fh, self.boy.x, self.boy.y)
-        # else: # face_dir == -1: # left
-        #     self.boy.image.clip_draw(sx, sy, fw, fh, self.boy.x, self.boy.y)
-        self.boy.image.clip_draw(sx, sy, fw, fh, self.boy.x, self.boy.y)
+        self.boy.image.clip_draw(sx, sy, 100, 100, self.boy.x, self.boy.y)
 
 
 
@@ -90,9 +81,9 @@ class Run:
         self.boy = boy
 
     def enter(self, e):
-        if right_down(e):       self.boy.dx += 1; self.boy.last_hdir = 1
+        if right_down(e):       self.boy.dx += 1; self.boy.current_dir = 1
         elif right_up(e):       self.boy.dx -= 1
-        elif left_down(e):      self.boy.dx -= 1; self.boy.last_hdir = -1
+        elif left_down(e):      self.boy.dx -= 1; self.boy.current_dir = -1
         elif left_up(e):        self.boy.dx += 1
         elif up_down(e):        self.boy.dy += 1
         elif up_up(e):          self.boy.dy -= 1
@@ -118,23 +109,19 @@ class Run:
             self.boy.state_machine.handle_state_event(('STOP', None))
 
     def draw(self):
-        fw, fh = self.boy.fw, self.boy.fh
-        sx = (self.boy.frame % FRAME_COLS) * fw
-        sy = RUN_ROW * fh
+        sx = (self.boy.frame % 5) * 100
+        sy = 100 # 두번째 행
 
-        # if self.boy.face_dir == 1: # right
         if self.boy.current_dir < 0:
-            self.boy.image.clip_draw(self.boy.frame * 100, 100, 100, 100, self.boy.x, self.boy.y)
+            self.boy.image.clip_draw(sx+100, sy, 100, 100, self.boy.x, self.boy.y)
         else: # face_dir == -1: # left
-            self.boy.image.clip_draw(self.boy.frame * 100, 0, 100, 100, self.boy.x, self.boy.y)
+            self.boy.image.clip_draw(sx, sy, 100, 100, self.boy.x, self.boy.y)
 
 
 class Boy:
     def __init__(self):
-        self.x, self.y = 400, 400
+        self.x, self.y = 360, 150
         self.frame = 0
-        # self.face_dir = 1
-        # self.dir = 0
 
         self.dx = 0 # 이동상태
         self.dy = 0
@@ -151,7 +138,6 @@ class Boy:
         self.state_machine = StateMachine(
             self.IDLE,
             {
-                # self.SLEEP : {space_down: self.IDLE},
                 self.IDLE : {right_down: self.RUN, left_down: self.RUN, up_down: self.RUN, down_down: self.RUN},
                 self.RUN : {right_down: self.RUN, left_down: self.RUN, up_down: self.RUN, down_down: self.RUN,
                             right_up: self.RUN,   left_up: self.RUN,   up_up: self.RUN,   down_up: self.RUN,
