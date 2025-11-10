@@ -130,4 +130,3 @@ class Boy:
 
     def draw(self):
         self.state_machine.draw()
-
