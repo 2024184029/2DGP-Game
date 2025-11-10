@@ -4,6 +4,7 @@ from pico2d import *
 from boy import Boy
 from background import Background
 import game_world
+from zombie import Zombie
 
 running = True
 image = None
@@ -33,6 +34,10 @@ def init():
     global boy
     boy = Boy()
     game_world.add_object(boy, 1)
+
+    global zombie
+    zombie = Zombie()
+    game_world.add_object(zombie, 1)
 
 
 def update():
