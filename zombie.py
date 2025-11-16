@@ -27,6 +27,7 @@ class Zombie:
         self.row = ROW_DOWN # 시작은 정면 방향
         self.vx, self.vy = dx * SPEED, dy * SPEED
         self.cols, self.rows = 4, 4
+        self.frame_hold = 0
 
 
     def enter(self):
@@ -54,11 +55,14 @@ class Zombie:
         else:
             self.row = ROW_DOWN if self.vy > 0 else ROW_UP
 
-        self.frame = (self.frame + 1) % FRAME_COUNT
+        self.frame_hold += 1
+
+        if self.frame_hold >= 25:  # 프레임 전환 속도 조절
+            self.frame_hold = 0
+            self.frame = (self.frame + 1) % FRAME_COUNT
 
     def draw(self):
         sx = (self.frame % FRAME_COUNT) * 100
-        # sy = (self.frame // FRAME_COUNT) * 200
         sy = self.row * 200
         self.image.clip_draw(sx, sy, 100, 200, self.x, self.y)
 
