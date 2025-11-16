@@ -19,12 +19,18 @@ RUN_FRAMES = [
     (2,0), (2,1), (2,2)
 ]
 
-# 미션 해결을 위한 이벤트 (나중에 구현)
-# def space_down(e): # e is space down ?
-#     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_SPACE
-#
-# time_out = lambda e: e[0] == 'TIMEOUT'
+MISSION_FRAME_COLS = 4
+MISSION_FRAME_ROWS = 3
 
+MISSION_FRAMES = [
+    (0, 0), (0, 1), (0, 2), (0, 3),
+    (1, 0), (1, 1), (1, 2)
+]
+
+def space_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_SPACE
+
+# time_out = lambda e: e[0] == 'TIMEOUT'
 def right_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_RIGHT
 
@@ -147,6 +153,45 @@ class Run:
                 self.boy.fw, self.boy.fh
             )
 
+class Mission:
+    def __init__(self, boy):
+        self.boy = boy
+
+    def enter(self, e):
+        self.boy.dx = 0
+        self.boy.dy = 0
+        self.boy.mission_frame = 0
+
+    def exit(self, e):
+        pass
+
+    def do(self):
+        self.boy.mission_frame += 1
+
+        if self.boy.mission_frame >= len(MISSION_FRAMES):
+            self.boy.state_machine.handle_state_event(('MISSION_END', None))
+            self.boy.mission_frame = len(MISSION_FRAMES) - 1
+
+    def draw(self):
+        row, col = MISSION_FRAMES[self.boy.mission_frame]
+
+        sx = col * self.boy.mfw
+        sy = (MISSION_FRAME_ROWS - 1 - row) * self.boy.mfh
+
+        if self.boy.current_dir >= 0:
+            self.boy.mission_image.clip_draw(
+                sx, sy, self.boy.mfw, self.boy.mfh,
+                self.boy.x, self.boy.y
+            )
+        else:
+            self.boy.mission_image.clip_composite_draw(
+                sx, sy, self.boy.mfw, self.boy.mfh,
+                0, 'h',
+                self.boy.x, self.boy.y,
+                self.boy.mfw, self.boy.mfh
+            )
+
+
 class Boy:
     def __init__(self):
         self.x, self.y = 360, 150
@@ -161,17 +206,41 @@ class Boy:
         self.fw = self.image.w // FRAME_COLS
         self.fh = self.image.h // FRAME_ROWS
 
+        self.mission_image = load_image('boy_mission.png')
+        self.mfw = self.mission_image.w // MISSION_FRAME_COLS
+        self.mfh = self.mission_image.h // MISSION_FRAME_ROWS
+        self.mission_frame = 0
+
         self.IDLE = Idle(self)
         self.RUN = Run(self)
+        self.MISSION = Mission(self)
 
         def is_stop(ev): return ev[0] == 'STOP'
+        def is_mission_end(ev): return ev[0] == 'MISSION_END'
+
         self.state_machine = StateMachine(
             self.IDLE,
             {
-                self.IDLE : {right_down: self.RUN, left_down: self.RUN, up_down: self.RUN, down_down: self.RUN},
-                self.RUN : {right_down: self.RUN, left_down: self.RUN, up_down: self.RUN, down_down: self.RUN,
-                            right_up: self.RUN,   left_up: self.RUN,   up_up: self.RUN,   down_up: self.RUN,
-                            is_stop: self.IDLE}
+                self.IDLE : {right_down: self.RUN,
+                             left_down: self.RUN,
+                             up_down: self.RUN,
+                             down_down: self.RUN,
+                             space_down: self.MISSION},
+
+                self.RUN : {right_down: self.RUN,
+                            left_down: self.RUN,
+                            up_down: self.RUN,
+                            down_down: self.RUN,
+                            right_up: self.RUN,
+                            left_up: self.RUN,
+                            up_up: self.RUN,
+                            down_up: self.RUN,
+                            space_down: self.MISSION,
+                            is_stop: self.IDLE},
+
+                self.MISSION: {
+                    is_mission_end: self.IDLE
+                }
             }
         )
 
