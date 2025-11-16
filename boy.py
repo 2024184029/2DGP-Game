@@ -5,11 +5,19 @@ import game_world
 from state_machine import StateMachine
 
 # 캐릭터 스프라이트 정보
-FRAME_COLS = 4
+FRAME_COLS = 5
 FRAME_ROWS = 3
 IDLE_ROW = 0           # Idle 프레임이 있는 행
 RUN_ROW  = 1           # Run 프레임이 있는 행
-SPEED = 0.3
+SPEED = 0.15
+
+# 실제 시트가 있는 칸만 사용하도록 설정
+IDLE_FRAMES = [(0,0), (0,1), (0,2), (0,3)]
+
+RUN_FRAMES = [
+    (1,0), (1,1), (1,2), (1,3), (1,4),
+    (2,0), (2,1), (2,2)
+]
 
 # 미션 해결을 위한 이벤트 (나중에 구현)
 # def space_down(e): # e is space down ?
@@ -20,14 +28,11 @@ SPEED = 0.3
 def right_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_RIGHT
 
-
 def right_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_RIGHT
 
-
 def left_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_LEFT
-
 
 def left_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_LEFT
@@ -35,14 +40,11 @@ def left_up(e):
 def up_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_UP
 
-
 def up_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_UP
 
-
 def down_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_DOWN
-
 
 def down_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_DOWN
@@ -64,15 +66,18 @@ class Idle:
         pass
 
     def do(self):
-        self.boy.frame = (self.boy.frame + 1) % FRAME_COLS
+        self.boy.frame = (self.boy.frame + 1) % len(IDLE_FRAMES) # Idle 프레임 수 4개만
 
     def draw(self):
-        offset_x = [-15, -10, -5, 0]  # 프레임별 중심 보정
-        sx = (self.boy.frame % 4) * 100
-        sy = 0 # 첫번째 행
+        row, col = IDLE_FRAMES[self.boy.frame]
 
-        self.boy.image.clip_draw(sx, sy, 100, 100, self.boy.x + offset_x[self.boy.frame], self.boy.y)
+        sx =  col * self.boy.fw
+        sy = (FRAME_ROWS - 1 - row) * self.boy.fh
 
+        self.boy.image.clip_draw(
+            sx, sy, self.boy.fw, self.boy.fh,
+            self.boy.x, self.boy.y
+        )
 
 
 class Run:
@@ -93,7 +98,7 @@ class Run:
         pass
 
     def do(self):
-        self.boy.frame = (self.boy.frame + 1) % FRAME_COLS
+        self.boy.frame = (self.boy.frame + 1) % len(RUN_FRAMES)
 
         self.boy.x += self.boy.dx * SPEED
         self.boy.y += self.boy.dy * SPEED
@@ -115,15 +120,22 @@ class Run:
             self.boy.state_machine.handle_state_event(('STOP', None))
 
     def draw(self):
-        offset_x = [-14, -10, -5, 0, 5]
-        sx = (self.boy.frame % 5) * 100
-        sy = 100 # 두번째 행
+
+        row, col = RUN_FRAMES[self.boy.frame]
+
+        sx = col * self.boy.fw
+        sy = (FRAME_ROWS - 1 - row) * self.boy.fh
 
         if self.boy.current_dir < 0:
-            self.boy.image.clip_draw(sx+100, sy, 100, 100, self.boy.x + offset_x[self.boy.frame], self.boy.y)
+            self.boy.image.clip_draw(
+                sx, sy, self.boy.fw, self.boy.fh,
+                self.boy.x, self.boy.y
+            )
         else: # face_dir == -1: # left
-            self.boy.image.clip_draw(sx, sy, 100, 100, self.boy.x + offset_x[self.boy.frame], self.boy.y)
-
+            self.boy.image.clip_draw(
+                sx, sy, self.boy.fw, self.boy.fh,
+                self.boy.x, self.boy.y
+            )
 
 class Boy:
     def __init__(self):

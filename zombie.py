@@ -11,7 +11,7 @@ ROW_RIGHT = 2   # 오른쪽
 ROW_UP    = 3   # 등 - 위
 
 FRAME_COUNT = 4
-SPEED = 0.2
+SPEED = 0.15
 
 class Zombie:
     global ROW_DOWN, ROW_LEFT, ROW_RIGHT, ROW_UP
