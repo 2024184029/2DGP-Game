@@ -20,7 +20,7 @@ RUN_FRAMES = [
 ]
 
 MISSION_FRAME_COLS = 4
-MISSION_FRAME_ROWS = 3
+MISSION_FRAME_ROWS = 2
 
 MISSION_FRAMES = [
     (0, 0), (0, 1), (0, 2), (0, 3),
@@ -62,17 +62,23 @@ class Idle:
         self.boy = boy
         self.boy.dy = 0
         self.boy.frame = 0
+        self.frame_hold = 0
 
     def enter(self, e):
         self.boy.dx = 0
         self.boy.dy = 0
         self.boy.frame = 0
+        self.frame_hold = 0
 
     def exit(self, e):
         pass
 
     def do(self):
-        self.boy.frame = (self.boy.frame + 1) % len(IDLE_FRAMES) # Idle 프레임 수 4개만
+        self.frame_hold += 1
+
+        if self.frame_hold >= 20:
+            self.frame_hold = 0
+            self.boy.frame = (self.boy.frame + 1) % len(IDLE_FRAMES)
 
     def draw(self):
         row, col = IDLE_FRAMES[self.boy.frame]
@@ -97,6 +103,7 @@ class Idle:
 class Run:
     def __init__(self, boy):
         self.boy = boy
+        self.frame_hold = 0
 
     def enter(self, e):
         if right_down(e):       self.boy.dx += 1; self.boy.current_dir = 1
@@ -108,11 +115,18 @@ class Run:
         elif down_down(e):      self.boy.dy -= 1
         elif down_up(e):        self.boy.dy += 1
 
+        self.frame_hold = 0
+
     def exit(self, e):
         pass
 
     def do(self):
-        self.boy.frame = (self.boy.frame + 1) % len(RUN_FRAMES)
+        self.frame_hold += 1
+
+        if self.frame_hold >= 18:
+            self.frame_hold = 0
+            self.boy.frame = (self.boy.frame + 1) % len(RUN_FRAMES)
+
 
         self.boy.x += self.boy.dx * SPEED
         self.boy.y += self.boy.dy * SPEED
@@ -156,17 +170,24 @@ class Run:
 class Mission:
     def __init__(self, boy):
         self.boy = boy
+        self.frame_hold = 0
 
     def enter(self, e):
         self.boy.dx = 0
         self.boy.dy = 0
         self.boy.mission_frame = 0
+        self.frame_hold = 0
 
     def exit(self, e):
         pass
 
     def do(self):
-        self.boy.mission_frame += 1
+        # self.boy.mission_frame += 1
+        self.frame_hold += 1
+
+        if self.frame_hold >= 25:
+            self.frame_hold = 0
+            self.boy.mission_frame += 1
 
         if self.boy.mission_frame >= len(MISSION_FRAMES):
             self.boy.state_machine.handle_state_event(('MISSION_END', None))
