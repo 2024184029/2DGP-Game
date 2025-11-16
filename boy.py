@@ -74,10 +74,18 @@ class Idle:
         sx =  col * self.boy.fw
         sy = (FRAME_ROWS - 1 - row) * self.boy.fh
 
-        self.boy.image.clip_draw(
-            sx, sy, self.boy.fw, self.boy.fh,
-            self.boy.x, self.boy.y
-        )
+        if self.boy.current_dir >= 0:
+            self.boy.image.clip_draw(
+                sx, sy, self.boy.fw, self.boy.fh,
+                self.boy.x, self.boy.y
+            )
+        else:
+            self.boy.image.clip_composite_draw(
+                sx, sy, self.boy.fw, self.boy.fh,
+                0, 'h',
+                self.boy.x, self.boy.y,
+                self.boy.fw, self.boy.fh
+            )
 
 
 class Run:
@@ -126,15 +134,17 @@ class Run:
         sx = col * self.boy.fw
         sy = (FRAME_ROWS - 1 - row) * self.boy.fh
 
-        if self.boy.current_dir < 0:
+        if self.boy.current_dir >= 0:
             self.boy.image.clip_draw(
                 sx, sy, self.boy.fw, self.boy.fh,
                 self.boy.x, self.boy.y
             )
         else: # face_dir == -1: # left
-            self.boy.image.clip_draw(
+            self.boy.image.clip_composite_draw(
                 sx, sy, self.boy.fw, self.boy.fh,
-                self.boy.x, self.boy.y
+                0, 'h',
+                self.boy.x, self.boy.y,
+                self.boy.fw, self.boy.fh
             )
 
 class Boy:
