@@ -3,6 +3,7 @@ from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK
 
 import game_world
 from state_machine import StateMachine
+from attack import Attack
 
 # 캐릭터 스프라이트 정보
 FRAME_COLS = 5
@@ -179,6 +180,9 @@ class Mission:
         self.frame_hold = 0
         self.boy.is_attacking = True
 
+        attack = Attack(self.boy.x, self.boy.y, self.boy.current_dir)
+        game_world.add_object(attack, 2)  # 레이어는 상황에 맞게
+
     def exit(self, e):
         self.boy.is_attacking = False
 
@@ -276,8 +280,8 @@ class Boy:
     def draw(self):
         self.state_machine.draw()
 
-        draw_rectangle(*self.get_bb())
-
+        # draw_rectangle(*self.get_bb())
+        #
         if self.is_attacking:
             draw_rectangle(*self.get_attack_bb())
 
