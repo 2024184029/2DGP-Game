@@ -5,6 +5,7 @@ from boy import Boy
 from background import Background
 import game_world
 from zombie import Zombie
+from enemies import Corn, Snail, Bug
 
 running = True
 image = None
@@ -38,6 +39,11 @@ def init():
     global zombie
     zombie = Zombie()
     game_world.add_object(zombie, 1)
+
+    global enemies
+    enemies = [ Corn(300, 300), Snail(500, 500), Bug(700, 700) ]
+    for e in enemies:
+        game_world.add_object(e, 1)
 
 
 def update():

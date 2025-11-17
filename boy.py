@@ -215,7 +215,7 @@ class Mission:
 
 class Boy:
     def __init__(self):
-        self.x, self.y = 360, 150
+        self.x, self.y = 370, 170
         self.frame = 0
         self.scale = 1.0
 
@@ -279,4 +279,4 @@ class Boy:
     # 충돌 처리
     def get_bb(self):
         half = 100 * self.scale
-        return self.x - half + 85, self.y - half + 60, self.x + half - 80, self.y + half - 70
+        return self.x - half + 85, self.y - half + 50, self.x + half - 80, self.y + half - 80
