@@ -3,6 +3,7 @@ import game_framework
 import play_mode
 
 image = None
+font = None
 
 def pause():
     pass
@@ -11,8 +12,10 @@ def resume():
     pass
 
 def init():
-    global image
+    global image, font
     image = load_image('title.png')
+    font = load_font('D2Coding.ttc', 15)
+
 
 def finish():
     global image
@@ -25,6 +28,7 @@ def update():
 def draw():
     clear_canvas()
     image.draw(512, 512)
+    font.draw(400, 830, "PRESS SPACE OR CLICK TO START", (255, 255, 255))
     update_canvas()
 
 def handle_events():
