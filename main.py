@@ -1,10 +1,10 @@
 from pico2d import *
 import game_framework
-import play_mode as play_state
+import title_mode
 
 def main():
     open_canvas(1024, 1024)
-    game_framework.run(play_state)
+    game_framework.run(title_mode)
     close_canvas()
 
 if __name__ == "__main__":

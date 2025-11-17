@@ -12,11 +12,12 @@ def resume():
 
 def init():
     global image
-    image = load_image('background.png')
+    image = load_image('title.png')
 
 def finish():
     global image
-    del image # 메모리 소멸
+    if image is not None:
+        del image # 메모리 소멸
 
 def update():
     pass
@@ -35,4 +36,7 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_SPACE):
+            game_framework.change_mode(play_mode)
+        # 마우스 왼쪽 클릭해도 전환
+        elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             game_framework.change_mode(play_mode)
