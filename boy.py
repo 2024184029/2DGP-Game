@@ -28,6 +28,9 @@ MISSION_FRAMES = [
     (1, 0), (1, 1), (1, 2)
 ]
 
+instance = None
+caution_image = None
+
 def space_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_SPACE
 
@@ -242,6 +245,13 @@ class Boy:
         self.RUN = Run(self)
         self.MISSION = Mission(self)
 
+        self.caution_icon = False   # 주의 아이콘
+        global caution_image
+        if caution_image is None:
+            caution_image = load_image('caution.png')
+        global instance
+        instance = self
+
         def is_stop(ev): return ev[0] == 'STOP'
         def is_mission_end(ev): return ev[0] == 'MISSION_END'
 
@@ -280,10 +290,18 @@ class Boy:
     def draw(self):
         self.state_machine.draw()
 
+        if self.caution_icon:
+            caution_image.draw(self.x, self.y + 50, 80, 80)
+
+        # 디버깅용 bb
         # draw_rectangle(*self.get_bb())
         #
-        if self.is_attacking:
-            draw_rectangle(*self.get_attack_bb())
+        # if self.is_attacking:
+        #     draw_rectangle(*self.get_attack_bb())
+
+    @staticmethod
+    def get_instance():
+        return instance
 
     # 충돌 처리
     def get_bb(self):

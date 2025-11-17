@@ -72,6 +72,13 @@ def update():
 
     handle_attack_collision()
 
+    dx = boy.x - zombie.x
+    dy = boy.y - zombie.y
+    distance = (dx ** 2 + dy ** 2) ** 0.5
+
+    CAUTION_DISTANCE = 300
+    boy.caution_icon = (distance <= CAUTION_DISTANCE)
+
     elapsed_time = time.time() - start_time
 
     # 2분 경과 시 게임 오버
