@@ -7,6 +7,7 @@ import game_world
 from zombie import Zombie
 from enemies import Corn, Snail, Bug
 import time
+from mask import Mask
 
 running = True
 image = None
@@ -51,9 +52,13 @@ def init():
     for e in enemies:
         game_world.add_object(e, 1)
 
+    global mask
+    mask = Mask(boy)
+    game_world.add_object(mask, 3)
+
     global start_time, font, game_over
     start_time = time.time()
-    font = load_font('D2Coding.ttc', 30)
+    font = load_font('D2Coding.ttc', 45)
     game_over = False
 
 
@@ -94,7 +99,7 @@ def draw_timer():
     seconds = total_seconds % 60
     time_text = f"{minutes:02}:{seconds:02}"
 
-    font.draw(512, 900, time_text, (255, 255, 255))
+    font.draw(450, 900, time_text, (255, 255, 255))
 
 
 def draw():
