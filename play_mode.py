@@ -65,11 +65,25 @@ def update():
     if game_over:
         return
 
+    handle_attack_collision()
+
     elapsed_time = time.time() - start_time
 
     # 2분 경과 시 게임 오버
     if elapsed_time >= 120:
         game_over = True
+
+def handle_attack_collision():
+    if not boy.is_attacking:
+        return
+
+    attack_bb = boy.get_attack_bb()
+    # 공격 당하면 제거됨 (나중에 체력 깎는 걸로 수정하기)
+    for e in enemies[:]:
+        if collide(attack_bb, e.get_bb()):
+            game_world.remove_object(e)
+            enemies.remove(e)
+
 
 
 def draw_timer():
@@ -88,6 +102,17 @@ def draw():
     game_world.render()
     draw_timer()
     update_canvas()
+
+def collide(a, b):
+    left_a, bottom_a, right_a, top_a = a
+    left_b, bottom_b, right_b, top_b = b
+
+    if left_a > right_b: return False
+    if right_a < left_b: return False
+    if top_a < bottom_b: return False
+    if bottom_a > top_b: return False
+    return True
+
 
 def finish():
     game_world.clear()

@@ -177,9 +177,10 @@ class Mission:
         self.boy.dy = 0
         self.boy.mission_frame = 0
         self.frame_hold = 0
+        self.boy.is_attacking = True
 
     def exit(self, e):
-        pass
+        self.boy.is_attacking = False
 
     def do(self):
         # self.boy.mission_frame += 1
@@ -231,6 +232,7 @@ class Boy:
         self.mfw = self.mission_image.w // MISSION_FRAME_COLS
         self.mfh = self.mission_image.h // MISSION_FRAME_ROWS
         self.mission_frame = 0
+        self.is_attacking = False # 미션 중인지 여부
 
         self.IDLE = Idle(self)
         self.RUN = Run(self)
@@ -276,7 +278,25 @@ class Boy:
 
         draw_rectangle(*self.get_bb())
 
+        if self.is_attacking:
+            draw_rectangle(*self.get_attack_bb())
+
     # 충돌 처리
     def get_bb(self):
         half = 100 * self.scale
         return self.x - half + 85, self.y - half + 50, self.x + half - 80, self.y + half - 80
+
+    def get_attack_bb(self):
+        left, bottom, right, top = self.get_bb()
+
+        if self.current_dir >= 0: # 오른쪽 공격
+            attack_left  = right
+            attack_right = right + 60  # 공격 범위
+        else: # 왼쪽 공격
+            attack_left  = left - 60
+            attack_right = left
+
+        attack_bottom = bottom + 10
+        attack_top    = top - 10
+
+        return attack_left, attack_bottom, attack_right, attack_top
