@@ -11,7 +11,7 @@ class Door:
 
         self.x = x
         self.y = y
-        self.scale = 0.25
+        self.scale = 0.28
 
         # door.png - 가로 4프레임
         self.total_frames = 4
@@ -25,6 +25,7 @@ class Door:
 
         self.is_opening = False  # 열리는 중인지
         self.is_open = False     # 완전히 열린 상태인지
+        self.already_hit = False
 
     # 플레이어 공격이 맞았을 때 호출
     def start_open(self):
@@ -35,18 +36,29 @@ class Door:
         self.frame_hold = 0
 
     def update(self):
-        # 열리는 중일 때만 애니메이션 진행
-        if self.is_opening and not self.is_open:
-            self.frame_hold += 1
-            if self.frame_hold >= self.frame_delay:
-                self.frame_hold = 0
-                self.frame += 1
+        # # 열리는 중일 때만 애니메이션 진행
+        # if self.is_opening and not self.is_open:
+        #     self.frame_hold += 1
+        #     if self.frame_hold >= self.frame_delay:
+        #         self.frame_hold = 0
+        #         self.frame += 1
+        #         # 마지막 프레임까지 재생하면 열린 상태로 고정
+        #         if self.frame >= self.total_frames:
+        #             self.frame = self.total_frames - 1
+        #             self.is_open = True
+        #             self.is_opening = False
+        pass
 
-                # 마지막 프레임까지 재생하면 열린 상태로 고정
-                if self.frame >= self.total_frames:
-                    self.frame = self.total_frames - 1
-                    self.is_open = True
-                    self.is_opening = False
+    def hit(self):
+        if self.is_open:
+            return
+
+        self.frame += 1
+        print("Door hit. frame =", self.frame)
+
+        if self.frame >= self.total_frames:
+            self.frame = self.total_frames - 1
+            self.is_open = True
 
     def draw(self):
         # 현재 프레임 한 칸만 잘라서 그리기

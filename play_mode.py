@@ -25,19 +25,24 @@ def resume():
     pass
 
 def handle_events():
+    global boy
     event_list = get_events()
     for event in event_list:
-        if event.type == SDL_QUIT:
+        if event.type == SDL_QUIT or (event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE):
             game_framework.quit()
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
-            game_framework.change_mode(title_mode)
-        elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
+        if event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             x = event.x
             y = get_canvas_height() - 1 - event.y
             print(f"좌표: ({x}, {y})")
-        else:
-            boy.handle_event(event)
 
+        boy.handle_event(event)
+
+        if event.type == SDL_KEYDOWN and event.key == SDLK_SPACE:
+            attack_bb = boy.get_attack_bb()   # 이 시점에서 이미 방향/공격 상태 반영됨
+
+            for d in doors:
+                if not d.is_open and collide(attack_bb, d.get_bb()):
+                    d.hit()
 
 def init():
     background = Background()
@@ -63,10 +68,10 @@ def init():
     global doors
     doors = []
     DOOR_POSITIONS = [
-        (130, 220),  # 왼쪽 아래 집
-        (190, 450),  # 왼쪽 위 2층 집
-        (220, 640),  # 왼쪽 위 3층 집
-        (700, 320),  # 가운데 중간 집
+        (130, 240),  # 왼쪽 아래 집
+        (488, 180),  # 왼쪽 우측 아래 집
+        (135, 645),  # 왼쪽 위 3층 집
+        (700, 330),  # 가운데 중간 집
         (980, 560),  # 오른쪽 위 큰 집들 중 하나
         (880, 840), # 오른쪽 위 젤 큰 집
     ]
@@ -98,6 +103,11 @@ def update():
     CAUTION_DISTANCE = 300
     boy.caution_icon = (distance <= CAUTION_DISTANCE)
 
+    # 공격이 끝났다면 문들의 hit 상태 초기화
+    if not boy.is_attacking:
+        for d in doors:
+            d.already_hit = False
+
     elapsed_time = time.time() - start_time
 
     # 2분 경과 시 게임 오버
@@ -115,9 +125,12 @@ def handle_attack_collision():
             game_world.remove_object(e)
             enemies.remove(e)
 
-    for d in doors:
-        if not d.is_open and collide(attack_bb, d.get_bb()):
-            d.start_open()
+    # for d in doors:
+    #     if not d.is_open and collide(attack_bb, d.get_bb()):
+    #         if not d.already_hit:
+    #             # d.start_open()
+    #             print("Hit door at:", d.x, d.y)  # 디버그
+    #             d.hit()
 
 def draw_timer():
     global elapsed_time, font
