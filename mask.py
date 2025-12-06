@@ -9,4 +9,5 @@ class Mask:
         pass
 
     def draw(self):
-        self.image.draw(self.boy.x, self.boy.y)
+        # self.image.draw(self.boy.x, self.boy.y)
+        pass

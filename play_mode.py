@@ -8,6 +8,7 @@ from zombie import Zombie
 from enemies import Corn, Snail, Bug
 import time
 from mask import Mask
+from door import Door
 
 running = True
 image = None
@@ -30,7 +31,10 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.change_mode(title_mode)
-
+        elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
+            x = event.x
+            y = get_canvas_height() - 1 - event.y
+            print(f"좌표: ({x}, {y})")
         else:
             boy.handle_event(event)
 
@@ -55,6 +59,21 @@ def init():
     global mask
     mask = Mask(boy)
     game_world.add_object(mask, 3)
+
+    global doors
+    doors = []
+    DOOR_POSITIONS = [
+        (130, 220),  # 왼쪽 아래 집
+        (190, 450),  # 왼쪽 위 2층 집
+        (220, 640),  # 왼쪽 위 3층 집
+        (700, 320),  # 가운데 중간 집
+        (980, 560),  # 오른쪽 위 큰 집들 중 하나
+        (880, 840), # 오른쪽 위 젤 큰 집
+    ]
+    for x, y in DOOR_POSITIONS:
+        d = Door(x, y)
+        doors.append(d)
+    game_world.add_objects(doors, 1)
 
     global start_time, font, game_over
     start_time = time.time()
@@ -96,7 +115,9 @@ def handle_attack_collision():
             game_world.remove_object(e)
             enemies.remove(e)
 
-
+    for d in doors:
+        if not d.is_open and collide(attack_bb, d.get_bb()):
+            d.start_open()
 
 def draw_timer():
     global elapsed_time, font

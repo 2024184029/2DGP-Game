@@ -9,7 +9,7 @@ FRAME_H = 100
 
 DEFAULT_SPEED = 0.10           # 기본 이동 속도
 DEFAULT_MOVE_RADIUS = 30       # 중심에서 이동 거리
-DEFAULT_FRAME_DELAY = 10        # 기본 프레임 유지 횟수
+DEFAULT_FRAME_DELAY = 15        # 기본 프레임 유지 횟수
 
 class Enemies:
     def __init__(self, image_file, x, y,
@@ -67,10 +67,10 @@ class Enemies:
         if t >= self.next_turn:
             dx, dy = choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
             self.vx, self.vy = dx * self.speed, dy * self.speed
-            self.next_turn = t + 1.5
+            self.next_turn = t + 2.0
 
         # 프레임 속도 조절
-        self.frame_hold += 1
+        self.frame_hold += 0.5
 
         if self.frame_hold >= self.frame_delay:
             self.frame_hold = 0

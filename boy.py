@@ -135,7 +135,7 @@ class Run:
         self.boy.x += self.boy.dx * SPEED
         self.boy.y += self.boy.dy * SPEED
 
-        W, H = 1024, 1024
+        W, H = 1536, 1024
         half_w, half_h = self.boy.fw // 2, self.boy.fh // 2
         self.boy.x = max(half_w, min(self.boy.x, W - half_w))
         self.boy.y = max(half_h, min(self.boy.y, H - half_h))
@@ -294,10 +294,10 @@ class Boy:
             caution_image.draw(self.x, self.y + 50, 80, 80)
 
         # 디버깅용 bb
-        # draw_rectangle(*self.get_bb())
-        #
-        # if self.is_attacking:
-        #     draw_rectangle(*self.get_attack_bb())
+        draw_rectangle(*self.get_bb())
+
+        if self.is_attacking:
+            draw_rectangle(*self.get_attack_bb())
 
     @staticmethod
     def get_instance():

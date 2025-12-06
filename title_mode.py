@@ -27,7 +27,7 @@ def update():
 
 def draw():
     clear_canvas()
-    image.draw(512, 512)
+    image.draw(750, 500) # 1500, 1000
     font.draw(400, 830, "PRESS SPACE OR CLICK TO START", (255, 255, 255))
     update_canvas()
 

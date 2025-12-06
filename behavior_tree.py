@@ -1,3 +1,4 @@
+DEBUG_BT = False   # 콘솔에 로그 출력
 
 level = 0
 def indent():
@@ -10,6 +11,7 @@ def unindent():
 
 def print_indent():
     for i in range(level):
+
         print("    ", end='')
 
 
@@ -27,7 +29,8 @@ class BehaviorTree:
         self.root.tag_condition()
 
     def run(self):
-        print('\n========================================== NEW TICK =======================================================')
+        if DEBUG_BT:
+            print('\n========================================== NEW TICK =======================================================')
         self.root.run()
         if self.root.value == BehaviorTree.SUCCESS:
             self.root.reset()
@@ -44,7 +47,8 @@ class Node:
     def show_result(f):
         def inner(self):
             result = f(self)
-            print(f'[{self.__class__.__name__:10s}] {self.name:40s} ==> ({result})')
+            if DEBUG_BT:
+                print(f'[{self.__class__.__name__:10s}] {self.name:40s} ==> ({result})')
             return result
 
         return inner
@@ -79,7 +83,7 @@ class Selector(Node):
     @Node.show_result
     def run(self):
         for i, child in enumerate(self.children):
-            print(i, child.value, child.has_condition)
+            # print(i, child.value, child.has_condition)
             if (child.value in (BehaviorTree.UNDEF, BehaviorTree.RUNNING)) or child.has_condition:
                 self.value = child.run()
                 if self.value in (BehaviorTree.RUNNING, BehaviorTree.SUCCESS):

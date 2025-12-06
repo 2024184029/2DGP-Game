@@ -3,7 +3,7 @@ import game_framework
 import title_mode
 
 def main():
-    open_canvas(1024, 1024)
+    open_canvas(1500, 1000)
     game_framework.run(title_mode)
     close_canvas()
 
