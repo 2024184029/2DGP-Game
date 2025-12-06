@@ -44,7 +44,7 @@ def init():
     game_world.add_object(boy, 1)
 
     global zombie
-    zombie = Zombie()
+    zombie = Zombie(boy)
     game_world.add_object(zombie, 1)
 
     global enemies
