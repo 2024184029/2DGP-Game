@@ -18,7 +18,8 @@ ROW_UP    = 2   # 등(위에서 4번째 줄)
 # 공격 애니메이션이 있는 줄 (위에서 5번째 줄)
 ROW_ATTACK = 1
 
-ATTACK_RANGE = 150    # 공격 유효 범위
+ATTACK_RANGE = 50              # 공격 모드 돌입 거리 (근접해야 멈춤)
+ATTACK_HIT_RANGE = 100          # 실제 공격 판정 거리 (휘두르면 닿는 범위)
 
 FRAME_COUNT = 5
 FRAME_W = 200
@@ -190,7 +191,6 @@ class Zombie:
     def get_attack_bb(self):
         left, bottom, right, top = self.get_bb()
 
-        # 몸통 + 확장된 전체 박스 기준에서 살짝 안쪽만 사용
         pad_x = (right - left) * 0.2
         pad_y = (top - bottom) * 0.2
 
@@ -282,10 +282,10 @@ class Zombie:
                 self.face_dir = 'down'
 
 
-        # ★ 실제 공격 판정 (ATTACK_RANGE 안에 있을 때만)
+        # 실제 공격 판정 (ATTACK_RANGE 안에 있을 때만)
         dist2 = dx * dx + dy * dy
-        # 살짝 더 타이트하게 0.8배 정도 범위 안에서만 데미지
-        effective_range = ATTACK_RANGE * 0.8
+        # 실제 공격 판정은 HIT_RANGE 사용
+        effective_range = ATTACK_HIT_RANGE
 
         if dist2 <= (effective_range ** 2):
             now = get_time()

@@ -122,11 +122,11 @@ class Key:
         self.fw = self.image.w // self.cols   # 1200 // 12 = 100
         self.fh = self.image.h                # 400
 
-        # 키 생성 범위 제한 (300픽셀씩 여백 둠)
+        # 키 생성 범위 제한
         min_x = 300
-        max_x = 1500 - 300  # 1200
+        max_x = 800
         min_y = 300
-        max_y = 1000 - 300  # 700
+        max_y = 500
 
         self.x = random.randint(min_x, max_x)
         self.y = random.randint(min_y, max_y)
