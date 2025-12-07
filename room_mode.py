@@ -1,9 +1,11 @@
 from pico2d import *
 import game_framework
+from mask import Mask
 
 # 전역 변수
 room_image = None
 player = None
+room_mask = None
 
 class RoomPlayer:
     def __init__(self):
@@ -16,7 +18,9 @@ class RoomPlayer:
         self.fw = self.image.w // self.FRAME_COLS
         self.fh = self.image.h // self.FRAME_ROWS
 
-        # 방 안 시작 위치 (맵 크기 1500x1000 기준, 문 앞 정도로 적당히)
+        self.scale = 1.2
+
+        # 방 안 시작 위치
         self.x = 750
         self.y = 150
 
@@ -34,6 +38,7 @@ class RoomPlayer:
         # 속도 (프레임당 픽셀)
         self.SPEED = 0.3
 
+
     def update(self):
         # 이동
         nx = self.x + self.dx * self.SPEED
@@ -41,8 +46,8 @@ class RoomPlayer:
 
         # 방 크기(마을이랑 똑같이 1500x1000 기준)
         W, H = 1500, 1000
-        half_w = self.fw // 2
-        half_h = self.fh // 2
+        half_w = int(self.fw * self.scale) // 2
+        half_h = int(self.fh * self.scale) // 2
 
         # 화면 벽에서 안 나가게 클램프
         nx = max(half_w, min(nx, W - half_w))
@@ -67,6 +72,8 @@ class RoomPlayer:
             self.frame = 0
             self.frame_hold = 0
 
+
+
     def draw(self):
         row = 1
         col = self.frame
@@ -74,14 +81,23 @@ class RoomPlayer:
         sx = col * self.fw
         sy = (self.FRAME_ROWS - 1 - row) * self.fh
 
-        if self.face_dir >= 0:
-            self.image.clip_draw(sx, sy, self.fw, self.fh, self.x, self.y)
-        else:
-            self.image.clip_composite_draw(sx, sy, self.fw, self.fh,
-                                           0, 'h',
-                                           self.x, self.y,
-                                           self.fw, self.fh)
+        draw_w = int(self.fw * self.scale)
+        draw_h = int(self.fh * self.scale)
 
+        if self.face_dir >= 0:
+            self.image.clip_draw(
+                sx, sy,
+                self.fw, self.fh,
+                self.x, self.y,
+                draw_w, draw_h
+            )
+        else:
+            self.image.clip_composite_draw(
+                sx, sy, self.fw, self.fh,
+                0, 'h',
+                self.x, self.y,
+                draw_w, draw_h
+            )
 
 def init():
     global room_image, player
