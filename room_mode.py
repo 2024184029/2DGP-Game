@@ -1,25 +1,149 @@
-# room_mode.py
 from pico2d import *
 import game_framework
-import game_world
-import play_mode  # ESC로 다시 마을로 나갈 거면 필요
 
-name = "RoomMode"
+# 전역 변수
+room_image = None
+player = None
 
-image = None
+class RoomPlayer:
+    def __init__(self):
+        self.image = load_image('boy.png')
+
+        # 스프라이트 시트
+        self.FRAME_COLS = 5
+        self.FRAME_ROWS = 3
+
+        self.fw = self.image.w // self.FRAME_COLS
+        self.fh = self.image.h // self.FRAME_ROWS
+
+        # 방 안 시작 위치 (맵 크기 1500x1000 기준, 문 앞 정도로 적당히)
+        self.x = 750
+        self.y = 150
+
+        # 이동 방향 (키 입력으로 -1, 0, 1)
+        self.dx = 0
+        self.dy = 0
+
+        # 현재 바라보는 방향 (1: 오른쪽, -1: 왼쪽)
+        self.face_dir = 1
+
+        # 간단한 애니메이션용 프레임
+        self.frame = 0
+        self.frame_hold = 0
+
+        # 속도 (프레임당 픽셀)
+        self.SPEED = 0.3
+
+    def update(self):
+        # 이동
+        nx = self.x + self.dx * self.SPEED
+        ny = self.y + self.dy * self.SPEED
+
+        # 방 크기(마을이랑 똑같이 1500x1000 기준)
+        W, H = 1500, 1000
+        half_w = self.fw // 2
+        half_h = self.fh // 2
+
+        # 화면 벽에서 안 나가게 클램프
+        nx = max(half_w, min(nx, W - half_w))
+        ny = max(half_h, min(ny, H - half_h))
+
+        self.x, self.y = nx, ny
+
+        # 바라보는 방향 갱신
+        if self.dx > 0:
+            self.face_dir = 1
+        elif self.dx < 0:
+            self.face_dir = -1
+
+        # 아주 간단한 프레임 애니메이션 (걸을 때만)
+        if self.dx != 0 or self.dy != 0:
+            self.frame_hold += 1
+            if self.frame_hold >= 8:
+                self.frame_hold = 0
+                # 대충 RUN 행에 있는 프레임 범위 안에서만 돈다고 가정
+                self.frame = (self.frame + 1) % 4
+        else:
+            self.frame = 0
+            self.frame_hold = 0
+
+    def draw(self):
+        row = 1
+        col = self.frame
+
+        sx = col * self.fw
+        sy = (self.FRAME_ROWS - 1 - row) * self.fh
+
+        if self.face_dir >= 0:
+            self.image.clip_draw(sx, sy, self.fw, self.fh, self.x, self.y)
+        else:
+            self.image.clip_composite_draw(sx, sy, self.fw, self.fh,
+                                           0, 'h',
+                                           self.x, self.y,
+                                           self.fw, self.fh)
 
 
 def init():
-    """룸 화면 초기화: room.png 로드"""
-    global image
-    # 캔버스가 이미 open_canvas() 된 상태라고 가정
-    image = load_image('room.png')
+    global room_image, player
+
+    room_image = load_image('room.png')
+
+    player = RoomPlayer()
 
 
 def finish():
-    """룸 모드 끝날 때 호출 (지금은 비워둬도 상관 없음)"""
-    # 룸 안에서 game_world에 뭘 올릴 거면 여기서 정리하면 됨
-    pass
+    global room_image, player
+
+    room_image = None
+    player = None
+
+
+def update():
+
+    if player:
+        player.update()
+
+
+def draw():
+    clear_canvas()
+
+    room_image.draw(1500 // 2, 1000 // 2, 1500, 1000)
+
+    if player:
+        player.draw()
+
+    update_canvas()
+
+
+def handle_events():
+    global player
+    events = get_events()
+    for e in events:
+        if e.type == SDL_QUIT:
+            game_framework.quit()
+
+        elif e.type == SDL_KEYDOWN:
+            if e.key == SDLK_ESCAPE:
+                # ESC 누르면 게임 종료
+                game_framework.quit()
+            elif e.key == SDLK_RIGHT:
+                player.dx += 1
+            elif e.key == SDLK_LEFT:
+                player.dx -= 1
+            elif e.key == SDLK_UP:
+                player.dy += 1
+            elif e.key == SDLK_DOWN:
+                player.dy -= 1
+
+        elif e.type == SDL_KEYUP:
+            if e.key == SDLK_RIGHT:
+                player.dx -= 1
+            elif e.key == SDLK_LEFT:
+                player.dx += 1
+            elif e.key == SDLK_UP:
+                player.dy -= 1
+            elif e.key == SDLK_DOWN:
+                player.dy += 1
 
 
 def pause():
@@ -28,85 +152,3 @@ def pause():
 
 def resume():
     pass
-
-
-def handle_events():
-    events = get_events()
-    for e in events:
-        if e.type == SDL_QUIT:
-            game_framework.quit()
-
-        elif e.type == SDL_KEYDOWN:
-            # ESC 누르면 다시 마을(play_mode)로 나가기
-            if e.key == SDLK_ESCAPE:
-                game_framework.change_mode(play_mode)
-            # TODO: 나중에 여기서 룸 안 미션 관련 키 입력 처리하면 됨
-
-
-def update():
-    # 나중에 룸 안에서 좀비/퍼즐/타이머 넣으면 여기에서 업데이트
-    pass
-
-
-def draw():
-    clear_canvas()
-    w, h = get_canvas_width(), get_canvas_height()
-    # 화면 정중앙에 room.png 그리기
-    image.draw(w // 2, h // 2)
-    update_canvas()
-# room_mode.py
-from pico2d import *
-import game_framework
-import game_world
-import play_mode  # ESC로 다시 마을로 나갈 거면 필요
-
-name = "RoomMode"
-
-image = None
-
-
-def init():
-    """룸 화면 초기화: room.png 로드"""
-    global image
-    # 캔버스가 이미 open_canvas() 된 상태라고 가정
-    image = load_image('room.png')
-
-
-def finish():
-    """룸 모드 끝날 때 호출 (지금은 비워둬도 상관 없음)"""
-    # 룸 안에서 game_world에 뭘 올릴 거면 여기서 정리하면 됨
-    pass
-
-
-def pause():
-    pass
-
-
-def resume():
-    pass
-
-
-def handle_events():
-    events = get_events()
-    for e in events:
-        if e.type == SDL_QUIT:
-            game_framework.quit()
-
-        elif e.type == SDL_KEYDOWN:
-            # ESC 누르면 다시 마을(play_mode)로 나가기
-            if e.key == SDLK_ESCAPE:
-                game_framework.change_mode(play_mode)
-            # TODO: 나중에 여기서 룸 안 미션 관련 키 입력 처리하면 됨
-
-
-def update():
-    # 나중에 룸 안에서 좀비/퍼즐/타이머 넣으면 여기에서 업데이트
-    pass
-
-
-def draw():
-    clear_canvas()
-    w, h = get_canvas_width(), get_canvas_height()
-    # 화면 정중앙에 room.png 그리기
-    image.draw(w // 2, h // 2)
-    update_canvas()
