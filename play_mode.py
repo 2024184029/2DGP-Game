@@ -26,12 +26,38 @@ font = None # 시간 출력 폰트
 
 doors = []
 key_door_index = -1
+# room에서 키를 먹었는지 여부
+has_master_key = False
+
+# EXIT 문 / 게임클리어 관련
+EXIT_X, EXIT_Y = 1030, 430  # 마을에서 exit 문 위치 (월드 좌표)
+
+exit_image = None
+exit_active = False          # 키 가져오고 마을로 돌아오면 True
+exit_cols = 8                # exit.png 가로 프레임 수 (800 / 8 = 100)
+exit_frame = 0
+exit_frame_hold = 0
+exit_frame_delay = 20         # 숫자 클수록 느리게
+
+exit_playing = False         # 플레이어가 문 앞에 서서 애니메이션 재생 중인지
+boy_removed = False          # 애니메이션 끝나고 플레이어 삭제했는지
+
+DOOR_SCALE = 0.7             # 문 크기 줄이기
+
+gameclear_image = None
+game_cleared = False
+gameclear_start_time = 0.0
+
+
 
 def pause():
     pass
 
 def resume():
-    pass
+    # room_mode에서 돌아왔을 때, 키를 먹었으면 exit 문 활성화
+    global exit_active
+    if has_master_key:
+        exit_active = True
 
 def handle_events():
     global boy
@@ -78,12 +104,12 @@ def init():
     global doors, key_door_index
     doors = []
     DOOR_POSITIONS = [
-        (130, 240),  # 왼쪽 아래 집
-        (488, 180),  # 왼쪽 우측 아래 집
-        (135, 645),  # 왼쪽 위 3층 집
-        (700, 330),  # 가운데 중간 집
-        (980, 560),  # 오른쪽 위 큰 집들 중 하나
-        (880, 840),  # 오른쪽 위 젤 큰 집
+        (135, 250),  # 왼쪽 아래 집
+        (495, 180),  # 왼쪽 우측 아래 집
+        (140, 670),  # 왼쪽 위 3층 집
+        (720, 340),  # 가운데 중간 집
+        (1005, 580),  # 오른쪽 위 큰 집들 중 하나
+        (900, 860),  # 오른쪽 위 젤 큰 집
     ]
 
     # 6개 문 중에서 랜덤으로 1개를 "키 있는 방"으로 지정
@@ -107,6 +133,22 @@ def init():
 
     ui_life.init()
 
+    # ★ exit / gameclear 이미지 로딩 및 상태 초기화
+    global exit_image, exit_active, exit_frame, exit_frame_hold
+    global exit_playing, boy_removed
+    global gameclear_image, game_cleared, gameclear_start_time
+
+    exit_image = load_image('exit.png')          # 800x150짜리 스프라이트 시트
+    gameclear_image = load_image('gameclear.png')
+
+    exit_active = False
+    exit_frame = 0
+    exit_frame_hold = 0
+    exit_playing = False
+    boy_removed = False
+
+    game_cleared = False
+    gameclear_start_time = 0.0
 
 def update():
     game_world.update()
@@ -148,16 +190,98 @@ def update():
             d.entered_room = True
 
             import room_mode
-
-            # 이 문이 키 방인지 여부를 room_mode에 알려준다
             room_mode.set_room_has_key(getattr(d, 'has_key_room', False))
-
             game_framework.push_mode(room_mode)
             return
+
+    # exit / gameclear 상태 갱신
+    update_exit_and_clear()
 
     # 게임 오버면 더 이상 진행 안 함
     if game_over:
         return
+
+
+def update_exit_and_clear():
+
+    global exit_frame, exit_frame_hold
+    global exit_playing, boy_removed
+    global game_cleared, gameclear_start_time
+
+    if not exit_active:
+        return
+
+    # 이미 클리어 상태라면, 일정 시간 뒤 게임 종료
+    if game_cleared:
+        if time.time() - gameclear_start_time > 2.0:
+            game_framework.quit()
+        return
+
+    # 아직 클리어 전인데, 애니메이션 재생 중이면 프레임만 갱신
+    if exit_playing:
+        # 프레임 천천히 넘기기
+        exit_frame_hold += 1
+        if exit_frame_hold >= exit_frame_delay:
+            exit_frame_hold = 0
+            exit_frame += 1
+
+            # 마지막 프레임(7)까지 재생했으면 클리어 처리
+            if exit_frame >= exit_cols:
+                exit_frame = exit_cols - 1  # 마지막 프레임 유지
+                exit_playing = False
+
+                # 플레이어 제거 (문 안으로 들어간 느낌)
+                if not boy_removed:
+                    game_world.remove_object(boy)
+                    boy_removed = True
+
+                # 게임 클리어 상태로 전환
+                game_cleared = True
+                gameclear_start_time = time.time()
+
+        return
+
+    # 여기까지 왔다는 건 아직 애니메이션 재생 안 한 상태(exit_playing == False, game_cleared == False)
+
+    # boy가 exit 문 근처에 오면 애니메이션 재생 시작
+    dx = boy.x - EXIT_X
+    dy = boy.y - EXIT_Y
+    if dx * dx + dy * dy <= (80 ** 2):   # 반경 80픽셀 안
+        exit_playing = True
+        exit_frame = 0
+        exit_frame_hold = 0
+
+def draw_exit_and_clear():
+
+    # exit 문
+    if exit_active and exit_image:
+        fw = exit_image.w // exit_cols   # 100
+        fh = exit_image.h                # 150
+
+        # 재생 중이 아니면 항상 0번 프레임 보여줌
+        frame_index = exit_frame if exit_playing or game_cleared else 0
+
+        col = frame_index % exit_cols
+        sx = col * fw
+        sy = 0
+
+        # 월드 좌표 → 화면 좌표
+        sx_screen, sy_screen = camera.world_to_screen(EXIT_X, EXIT_Y)
+
+        draw_w = fw * DOOR_SCALE
+        draw_h = fh * DOOR_SCALE
+
+        exit_image.clip_draw(
+            sx, sy, fw, fh,
+            sx_screen, sy_screen,
+            draw_w, draw_h
+        )
+
+    # gameclear 오버레이
+    if game_cleared and gameclear_image:
+        w = get_canvas_width()
+        h = get_canvas_height()
+        gameclear_image.draw(w // 2, h // 2)
 
 
 
@@ -197,6 +321,7 @@ def draw():
     draw_collision_boxes()
     ui_life.draw_hearts()
     ui_life.draw_gameover()
+    draw_exit_and_clear()
 
     update_canvas()
 

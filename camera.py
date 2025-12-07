@@ -6,7 +6,7 @@ MAP_W = 1500
 MAP_H = 1000
 
 # 카메라 민감도
-CAMERA_SENS = 1.9
+CAMERA_SENS = 1.0
 
 window_left = 0
 window_bottom = 0

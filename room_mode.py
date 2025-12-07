@@ -3,6 +3,7 @@ import game_framework
 from mask import Mask
 import random
 import ui_life
+import play_mode
 
 # 전역 변수
 room_image = None
@@ -121,6 +122,15 @@ class Key:
         self.fw = self.image.w // self.cols   # 1200 // 12 = 100
         self.fh = self.image.h                # 400
 
+        # 키 생성 범위 제한 (300픽셀씩 여백 둠)
+        min_x = 300
+        max_x = 1500 - 300  # 1200
+        min_y = 300
+        max_y = 1000 - 300  # 700
+
+        self.x = random.randint(min_x, max_x)
+        self.y = random.randint(min_y, max_y)
+
         # 화면에서는 조금 줄여서
         self.scale = 0.3   # 나중에 0.25~0.4 사이에서 마음에 드는 값 찾으면 됨
 
@@ -206,7 +216,7 @@ def update():
         if dx * dx + dy * dy <= (key.pick_radius ** 2):
             has_key = True
             key = None      # 화면에서 삭제
-            # 여기서 효과음, 메시지, 도어 열기 조건 등 추가 가능
+            play_mode.has_master_key = True
 
     if ui_life.should_quit():
         game_framework.quit()
