@@ -5,6 +5,7 @@ import random
 from random import randint, choice
 from behavior_tree import BehaviorTree, Action, Sequence, Condition, Selector
 import math
+from collision_bb import can_move
 
 # 전역 변수
 
@@ -65,20 +66,32 @@ class Zombie:
     def update(self):
         self.bt.run()
 
-        # 현재 속도대로 이동
-        self.x += self.vx
-        self.y += self.vy
-
-        # 화면 경계에서 전환
-        if self.x < 50 or self.x > 1000:   # 왼/오른쪽 벽
-            self.vx = -self.vx            # 방향 반전
-        if self.y < 50 or self.y > 1000:   # 위/아래 벽
-            self.vy = -self.vy            # 방향 반전
-            
+        # 애니메이션
         self.frame_hold += 1
-        if self.frame_hold >= 70:  # 프레임 전환 속도 조절
+        if self.frame_hold >= 70:
             self.frame_hold = 0
             self.frame = (self.frame + 1) % FRAME_COUNT
+
+        x, y = self.x, self.y
+        # 기본 이동 후보
+        nx = x + self.vx
+        ny = y + self.vy
+
+        # 화면 경계
+        if nx < 50 or nx > 1450:
+            self.vx = -self.vx
+            nx = x + self.vx
+        if ny < 50 or ny > 950:
+            self.vy = -self.vy
+            ny = y + self.vy
+
+        # 좀비 크기에 맞는 반지름(25 정도)으로 충돌 검사
+        if can_move(nx, ny, radius=25):
+            self.x, self.y = nx, ny
+        else:
+            # 벽이면 튕겨나가게
+            self.vx = -self.vx
+            self.vy = -self.vy
 
     def draw(self):
         sx = (self.frame % FRAME_COUNT) * self.w

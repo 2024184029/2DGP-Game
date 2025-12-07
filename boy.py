@@ -4,6 +4,8 @@ from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK
 import game_world
 from state_machine import StateMachine
 from attack import Attack
+from collision_bb import can_move
+
 
 # 캐릭터 스프라이트 정보
 FRAME_COLS = 5
@@ -125,27 +127,39 @@ class Run:
         pass
 
     def do(self):
+        # 애니메이션
         self.frame_hold += 1
-
         if self.frame_hold >= 18:
             self.frame_hold = 0
             self.boy.frame = (self.boy.frame + 1) % len(RUN_FRAMES)
 
+        # 1) 현재 위치
+        x, y = self.boy.x, self.boy.y
 
-        self.boy.x += self.boy.dx * SPEED
-        self.boy.y += self.boy.dy * SPEED
-
-        W, H = 1536, 1024
-        half_w, half_h = self.boy.fw // 2, self.boy.fh // 2
-        self.boy.x = max(half_w, min(self.boy.x, W - half_w))
-        self.boy.y = max(half_h, min(self.boy.y, H - half_h))
-
+        # 2) 이동량 계산
+        SPEED = 5
         if self.boy.dx != 0 and self.boy.dy != 0:
-            self.boy.x += (self.boy.dx * SPEED) / 1.5
-            self.boy.y += (self.boy.dy * SPEED) / 1.5
+            dx = (self.boy.dx * SPEED) / 1.5
+            dy = (self.boy.dy * SPEED) / 1.5
         else:
-            self.boy.x += self.boy.dx * SPEED
-            self.boy.y += self.boy.dy * SPEED
+            dx = self.boy.dx * SPEED
+            dy = self.boy.dy * SPEED
+
+        nx = x + dx
+        ny = y + dy
+
+        # 3) 화면 경계
+        W, H = 1500, 1000
+        half_w, half_h = self.boy.fw // 2, self.boy.fh // 2
+        nx = max(half_w, min(nx, W - half_w))
+        ny = max(half_h, min(ny, H - half_h))
+
+        # 4) 바운딩박스 충돌
+        # 캐릭터 반지름 20짜리 원
+        if can_move(nx, ny, radius=20):
+            self.boy.x, self.boy.y = nx, ny
+        # else: 막혀있으면 제자리
+
 
         # 정지하면 IDLE 상태로 전환
         if self.boy.dx == 0 and self.boy.dy == 0:

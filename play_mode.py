@@ -9,6 +9,7 @@ from enemies import Corn, Snail, Bug
 import time
 from mask import Mask
 from door import Door
+from collision_bb import draw_collision_boxes
 
 running = True
 image = None
@@ -147,6 +148,7 @@ def draw():
     clear_canvas()
     game_world.render()
     draw_timer()
+    draw_collision_boxes()
     update_canvas()
 
 def collide(a, b):
