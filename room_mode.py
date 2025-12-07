@@ -10,7 +10,6 @@ room_mask = None
 class RoomPlayer:
     def __init__(self):
         self.image = load_image('boy.png')
-
         # 스프라이트 시트
         self.FRAME_COLS = 5
         self.FRAME_ROWS = 3
@@ -100,18 +99,19 @@ class RoomPlayer:
             )
 
 def init():
-    global room_image, player
+    global room_image, player, room_mask
 
     room_image = load_image('room.png')
-
     player = RoomPlayer()
+    room_mask = Mask(player)
 
 
 def finish():
-    global room_image, player
+    global room_image, player, room_mask
 
     room_image = None
     player = None
+    room_mask = None
 
 
 def update():
@@ -127,6 +127,9 @@ def draw():
 
     if player:
         player.draw()
+
+    if room_mask:
+        room_mask.draw()
 
     update_canvas()
 
