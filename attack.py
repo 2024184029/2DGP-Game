@@ -1,5 +1,6 @@
 from pico2d import *
 import game_world
+import camera
 
 attack_image = None
 
@@ -45,15 +46,21 @@ class Attack:
         dw = sw * scale
         dh = sh * scale
 
-        if self.dir >= 0:   # 오른쪽
-            draw_x = self.x + dw * 1.3
-            self.image.clip_draw(sx, sy, sw, sh,
-                                 draw_x, self.y, dw, dh)
-        else:
-            draw_x = self.x - dw * 1.3
+        screen_x, screen_y = camera.world_to_screen(self.x, self.y)
+
+        if self.dir >= 0:  # 오른쪽 공격
+            draw_x = screen_x + dw * 1.3
+            self.image.clip_draw(
+                sx, sy, sw, sh,
+                draw_x, screen_y, dw, dh
+            )
+        else:  # 왼쪽 공격
+            draw_x = screen_x - dw * 1.3
             self.image.clip_composite_draw(
                 sx, sy, sw, sh,
-                0, 'h', draw_x, self.y, dw, dh)
+                0, 'h',
+                draw_x, screen_y, dw, dh
+            )
 
 
     def get_bb(self):

@@ -1,11 +1,14 @@
 from pico2d import *
 import game_framework
 from mask import Mask
+import random
 
 # 전역 변수
 room_image = None
 player = None
 room_mask = None
+key = None            # 키 객체
+has_key = False       # 키 먹었는지 여부
 
 class RoomPlayer:
     def __init__(self):
@@ -98,32 +101,108 @@ class RoomPlayer:
                 draw_w, draw_h
             )
 
+
+import random  # 파일 맨 위 import 쪽에 이미 안 돼 있으면 추가
+
+class Key:
+    def __init__(self):
+        # key.png는 1200x400, 가로 12프레임
+        self.image = load_image('key.png')
+
+        self.cols = 12
+        self.fw = self.image.w // self.cols   # 1200 // 12 = 100
+        self.fh = self.image.h                # 400
+
+        # 화면에서는 조금 줄여서
+        self.scale = 0.3   # 나중에 0.25~0.4 사이에서 마음에 드는 값 찾으면 됨
+
+        # ★ 애니메이션용
+        self.frame = 0
+        self.frame_hold = 0   # 몇 프레임마다 넘길지 조절용
+        self.frame_delay = 30
+
+
+        # 방 안 랜덤 위치 (벽에서 조금 띄워줌)
+        margin_x = 150
+        margin_y = 150
+        self.x = random.randint(margin_x, 1500 - margin_x)
+        self.y = random.randint(margin_y, 1000 - margin_y)
+
+        # 플레이어가 이 거리 안으로 오면 먹었다고 처리
+        self.pick_radius = 70
+
+    def update(self):
+        # 프레임 천천히 넘기기 (frame_hold값 바꾸면서 속도 조절)
+        self.frame_hold += 1
+        if self.frame_hold >= self.frame_delay:
+            self.frame_hold = 0
+            self.frame = (self.frame + 1) % self.cols  # 0~11 반복
+
+    def draw(self):
+        # 현재 프레임 잘라서 그리기
+        sx = self.frame * self.fw
+        sy = 0  # 한 줄짜리 시트라서 0
+
+        dw = int(self.fw * self.scale)
+        dh = int(self.fh * self.scale)
+
+        self.image.clip_draw(
+            sx, sy,
+            self.fw, self.fh,
+            self.x, self.y,
+            dw, dh
+        )
+
+
 def init():
-    global room_image, player, room_mask
+    global room_image, player, room_mask, key, has_key
+
 
     room_image = load_image('room.png')
     player = RoomPlayer()
     room_mask = Mask(player)
 
+    key = Key()
+    has_key = False
+
 
 def finish():
-    global room_image, player, room_mask
+    global room_image, player, room_mask, key, has_key
 
     room_image = None
     player = None
     room_mask = None
+    key = None
+    has_key = False
 
 
 def update():
+    global key, has_key
 
     if player:
         player.update()
+
+    # 키가 존재하고 아직 안 먹었다면
+    if key and not has_key:
+        key.update()   # 프레임 애니메이션
+
+        # 플레이어와의 거리 계산해서 먹었는지 체크
+        dx = player.x - key.x
+        dy = player.y - key.y
+        if dx * dx + dy * dy <= (key.pick_radius ** 2):
+            has_key = True
+            key = None      # 화면에서 삭제
+            # 여기서 효과음, 메시지, 도어 열기 조건 등 추가 가능
 
 
 def draw():
     clear_canvas()
 
     room_image.draw(1500 // 2, 1000 // 2, 1500, 1000)
+
+    # 키가 있으면 먼저 그림
+    if key:
+        key.draw()
 
     if player:
         player.draw()
