@@ -124,8 +124,7 @@ def handle_events():
 
         elif e.type == SDL_KEYDOWN:
             if e.key == SDLK_ESCAPE:
-                # ESC 누르면 게임 종료
-                game_framework.quit()
+                game_framework.pop_mode()
             elif e.key == SDLK_RIGHT:
                 player.dx += 1
             elif e.key == SDLK_LEFT:

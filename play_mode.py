@@ -78,6 +78,7 @@ def init():
     ]
     for x, y in DOOR_POSITIONS:
         d = Door(x, y)
+        d.entered_room = False
         doors.append(d)
     game_world.add_objects(doors, 1)
 
@@ -116,9 +117,10 @@ def update():
 
     # 문이 완전히 열린(= is_open=True) 문이 하나라도 있으면 RoomMode로 전환
     for d in doors:
-        if d.is_open:
+        if d.is_open and not d.entered_room:
+            d.entered_room = True
             import room_mode
-            game_framework.change_mode(room_mode)
+            game_framework.push_mode(room_mode)
             return
 
     # 게임 오버면 더 이상 진행 안 함
