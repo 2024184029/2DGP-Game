@@ -12,7 +12,7 @@ FRAME_COLS = 5
 FRAME_ROWS = 3
 IDLE_ROW = 0           # Idle 프레임이 있는 행
 RUN_ROW  = 1           # Run 프레임이 있는 행
-SPEED = 0.15
+SPEED = 0.3
 
 # 실제 시트가 있는 칸만 사용하도록 설정
 IDLE_FRAMES = [(0,0), (0,1), (0,2), (0,3)]
@@ -137,7 +137,7 @@ class Run:
         x, y = self.boy.x, self.boy.y
 
         # 2) 이동량 계산
-        SPEED = 5
+        SPEED = 0.3
         if self.boy.dx != 0 and self.boy.dy != 0:
             dx = (self.boy.dx * SPEED) / 1.5
             dy = (self.boy.dy * SPEED) / 1.5
@@ -237,7 +237,7 @@ class Mission:
 
 class Boy:
     def __init__(self):
-        self.x, self.y = 370, 170
+        self.x, self.y = 475, 76
         self.frame = 0
         self.scale = 1.0
 

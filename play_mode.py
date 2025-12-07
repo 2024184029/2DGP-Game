@@ -92,11 +92,9 @@ def update():
 
     global start_time, elapsed_time, game_over
 
-    if game_over:
-        return
-
     handle_attack_collision()
 
+    # 보이와 좀비 거리 계산해서 caution 아이콘 on/off
     dx = boy.x - zombie.x
     dy = boy.y - zombie.y
     distance = (dx ** 2 + dy ** 2) ** 0.5
@@ -109,11 +107,25 @@ def update():
         for d in doors:
             d.already_hit = False
 
+    # 타이머 갱신
     elapsed_time = time.time() - start_time
 
     # 2분 경과 시 게임 오버
     if elapsed_time >= 120:
         game_over = True
+
+    # 문이 완전히 열린(= is_open=True) 문이 하나라도 있으면 RoomMode로 전환
+    for d in doors:
+        if d.is_open:
+            import room_mode
+            game_framework.change_mode(room_mode)
+            return
+
+    # 게임 오버면 더 이상 진행 안 함
+    if game_over:
+        return
+
+
 
 def handle_attack_collision():
     if not boy.is_attacking:
