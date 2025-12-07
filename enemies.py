@@ -1,6 +1,7 @@
 from pico2d import *
 import random
 from random import choice
+import camera
 
 FRAME_COLS = 2
 FRAME_ROWS = 4
@@ -84,13 +85,23 @@ class Enemies:
         scale = 0.5
 
         sx = col * self.fw
-        sy = (self.rows - 1 - row) * self.fh   # 위/아래 뒤집기
+        sy = (self.rows - 1 - row) * self.fh  # 위/아래 뒤집기
 
-        self.image.clip_draw(sx, sy, self.fw, self.fh, self.x, self.y,
-                             self.fw * scale, self.fh * scale)
+        # 월드 -> 화면 좌표 변환
+        draw_x, draw_y = camera.world_to_screen(self.x, self.y)
 
-        # 디버그용
-        draw_rectangle(*self.get_bb())
+        # 화면 기준으로 그리기
+        self.image.clip_draw(
+            sx, sy, self.fw, self.fh,
+            draw_x, draw_y,
+            self.fw * scale, self.fh * scale
+        )
+
+        # 디버그용 BB도 카메라 기준으로
+        left, bottom, right, top = self.get_bb()  # 월드 좌표
+        l, b = camera.world_to_screen(left, bottom)
+        r, t = camera.world_to_screen(right, top)
+        draw_rectangle(l, b, r, t)
 
     def get_bb(self):
         half_w = self.fw * 0.3
