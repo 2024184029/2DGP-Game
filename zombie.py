@@ -7,6 +7,7 @@ from behavior_tree import BehaviorTree, Action, Sequence, Condition, Selector
 import math
 from collision_bb import can_move
 import camera
+import ui_life
 
 # 전역 변수
 
@@ -56,6 +57,9 @@ class Zombie:
 
         # 추적 대상 (플레이어)
         self.boy = boy
+
+        self.attack_cooltime = 1.0      # 1초마다 한 번씩만 데미지
+        self.last_attack_time = 0.0     # 마지막으로 공격이 들어간 시간
 
         # Behavior Tree 구성
         self.build_behavior_tree()
@@ -216,8 +220,8 @@ class Zombie:
         dist = math.sqrt(dx * dx + dy * dy) + 1e-6
 
         # Boy 방향으로
-        self.vx = (dx / dist) * SPEED * 1.2  # 추적할 때 더 빠르게
-        self.vy = (dy / dist) * SPEED * 1.2
+        self.vx = (dx / dist) * SPEED * 1.7  # 추적할 때 더 빠르게
+        self.vy = (dy / dist) * SPEED * 1.7
         self.update_row_from_velocity()
         return BehaviorTree.RUNNING
 
@@ -249,6 +253,19 @@ class Zombie:
                 self.face_dir = 'up'
             else:
                 self.face_dir = 'down'
+
+
+        # ★ 실제 공격 판정 (ATTACK_RANGE 안에 있을 때만)
+        dist2 = dx * dx + dy * dy
+        # 살짝 더 타이트하게 0.8배 정도 범위 안에서만 데미지
+        effective_range = ATTACK_RANGE * 0.8
+
+        if dist2 <= (effective_range ** 2):
+            now = get_time()
+            # 마지막 공격 후 쿨타임이 지났으면 데미지 1
+            if now - self.last_attack_time >= self.attack_cooltime:
+                ui_life.take_damage(1)       # ← 하트 1개 감소
+                self.last_attack_time = now  # 시간 갱신
 
         # 공격은 계속해서 유지되는 행동이라 RUNNING 반환
         return BehaviorTree.RUNNING

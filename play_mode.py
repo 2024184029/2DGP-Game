@@ -13,6 +13,8 @@ from door import Door
 from collision_bb import draw_collision_boxes
 import camera
 import court
+import random
+import ui_life
 
 running = True
 image = None
@@ -21,6 +23,9 @@ start_time = 0
 elapsed_time = 0
 game_over = False
 font = None # 시간 출력 폰트
+
+doors = []
+key_door_index = -1
 
 def pause():
     pass
@@ -70,7 +75,7 @@ def init():
     mask = Mask(boy)
     game_world.add_object(mask, 3)
 
-    global doors
+    global doors, key_door_index
     doors = []
     DOOR_POSITIONS = [
         (130, 240),  # 왼쪽 아래 집
@@ -78,18 +83,29 @@ def init():
         (135, 645),  # 왼쪽 위 3층 집
         (700, 330),  # 가운데 중간 집
         (980, 560),  # 오른쪽 위 큰 집들 중 하나
-        (880, 840), # 오른쪽 위 젤 큰 집
+        (880, 840),  # 오른쪽 위 젤 큰 집
     ]
-    for x, y in DOOR_POSITIONS:
+
+    # 6개 문 중에서 랜덤으로 1개를 "키 있는 방"으로 지정
+    key_door_index = random.randint(0, len(DOOR_POSITIONS) - 1)
+
+    for i, (x, y) in enumerate(DOOR_POSITIONS):
         d = Door(x, y)
         d.entered_room = False
+
+        # 이 문을 통해 들어가는 room에 key가 있을지 여부
+        d.has_key_room = (i == key_door_index)
+
         doors.append(d)
+
     game_world.add_objects(doors, 1)
 
     global start_time, font, game_over
     start_time = time.time()
-    font = load_font('D2Coding.ttc', 45)
+    font = load_font('D2Coding.ttc', 40)
     game_over = False
+
+    ui_life.init()
 
 
 def update():
@@ -117,15 +133,25 @@ def update():
     # 타이머 갱신
     elapsed_time = time.time() - start_time
 
+    # 하트가 0이 된 뒤 2초 지나면 게임 종료
+    if ui_life.should_quit():
+        game_framework.quit()
+        return
+
     # 2분 경과 시 게임 오버
     if elapsed_time >= 120:
         game_over = True
 
-    # 문이 완전히 열린(= is_open=True) 문이 하나라도 있으면 RoomMode로 전환
+    # 문이 완전히 열린 문이 하나라도 있으면 RoomMode로 전환
     for d in doors:
         if d.is_open and not d.entered_room:
             d.entered_room = True
+
             import room_mode
+
+            # 이 문이 키 방인지 여부를 room_mode에 알려준다
+            room_mode.set_room_has_key(getattr(d, 'has_key_room', False))
+
             game_framework.push_mode(room_mode)
             return
 
@@ -161,7 +187,7 @@ def draw_timer():
     seconds = total_seconds % 60
     time_text = f"{minutes:02}:{seconds:02}"
 
-    font.draw(450, 900, time_text, (255, 255, 255))
+    font.draw(730, 900, time_text, (255, 255, 255))
 
 
 def draw():
@@ -169,6 +195,9 @@ def draw():
     game_world.render()
     draw_timer()
     draw_collision_boxes()
+    ui_life.draw_hearts()
+    ui_life.draw_gameover()
+
     update_canvas()
 
 def collide(a, b):

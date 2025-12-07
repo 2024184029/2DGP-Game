@@ -2,6 +2,7 @@ from pico2d import *
 import game_framework
 from mask import Mask
 import random
+import ui_life
 
 # 전역 변수
 room_image = None
@@ -9,6 +10,13 @@ player = None
 room_mask = None
 key = None            # 키 객체
 has_key = False       # 키 먹었는지 여부
+room_has_key = False  # 이 방에 키가 있는지 여부
+
+
+def set_room_has_key(flag: bool):
+    # village 쪽에서 이 room에 key를 만들지 말지 알려주는 함수
+    global room_has_key
+    room_has_key = flag
 
 class RoomPlayer:
     def __init__(self):
@@ -162,18 +170,24 @@ def init():
     player = RoomPlayer()
     room_mask = Mask(player)
 
-    key = Key()
-    has_key = False
+    # 이 room에 key를 만들지 여부는 room_has_key를 보고 결정
+    if room_has_key:
+        key = Key()      # 키 있는 방이면 생성
+    else:
+        key = None       # 키 없는 방이면 생성 안 함
+
+    has_key = False      # 이 room에서 아직 키 안 먹은 상태
 
 
 def finish():
-    global room_image, player, room_mask, key, has_key
+    global room_image, player, room_mask, key, has_key, room_has_key
 
     room_image = None
     player = None
     room_mask = None
     key = None
     has_key = False
+    room_has_key = False
 
 
 def update():
@@ -194,6 +208,10 @@ def update():
             key = None      # 화면에서 삭제
             # 여기서 효과음, 메시지, 도어 열기 조건 등 추가 가능
 
+    if ui_life.should_quit():
+        game_framework.quit()
+        return
+
 
 def draw():
     clear_canvas()
@@ -209,6 +227,9 @@ def draw():
 
     if room_mask:
         room_mask.draw()
+
+    ui_life.draw_hearts()
+    ui_life.draw_gameover()
 
     update_canvas()
 
