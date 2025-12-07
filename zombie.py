@@ -6,6 +6,7 @@ from random import randint, choice
 from behavior_tree import BehaviorTree, Action, Sequence, Condition, Selector
 import math
 from collision_bb import can_move
+import camera
 
 # 전역 변수
 
@@ -95,17 +96,18 @@ class Zombie:
 
     def draw(self):
         sx = (self.frame % FRAME_COUNT) * self.w
-
-        # 이동일 때는 self.row, 공격 중이면 공격 줄 사용
         use_row = ROW_ATTACK if self.is_attacking else self.row
         sy = use_row * self.h
         # sy = (self.row) * self.h
 
+        draw_x, draw_y = camera.world_to_screen(self.x, self.y)
+
+        # 2) 좀비 스프라이트
         if self.row == ROW_SIDE and self.dir == -1:
             self.image.clip_composite_draw(
                 sx, sy, self.w, self.h,
                 0, 'h',
-                self.x, self.y,
+                draw_x, draw_y,
                 int(self.w * self.scale),
                 int(self.h * self.scale)
             )
@@ -114,12 +116,16 @@ class Zombie:
             self.image.clip_draw(
                 sx, sy,
                 self.w, self.h,
-                self.x, self.y,
+                draw_x, draw_y,
                 int(self.w * self.scale),
                 int(self.h * self.scale)
             )
-        # bb 보이게 함
-        draw_rectangle(*self.get_bb())
+
+        # 3) 디버그용 BB도 카메라 기준으로 그리기
+        left, bottom, right, top = self.get_bb()  # 여기까지는 월드 좌표
+        l, b = camera.world_to_screen(left, bottom)
+        r, t = camera.world_to_screen(right, top)
+        draw_rectangle(l, b, r, t)
 
     # 충돌 처리
     def get_bb(self):
@@ -151,10 +157,6 @@ class Zombie:
             return left, bottom, right, top
 
     def get_attack_bb(self):
-        # 몸통 기준 박스를 가져온 뒤, “진짜 공격 범위”만 따로 추출하고 싶으면
-        # 지금은 get_bb()에서 이미 확장했으니,
-        # 여기서는 살짝 더 안쪽으로 줄여서 '공격 핵심 판정' 정도로 써도 됨.
-
         left, bottom, right, top = self.get_bb()
 
         # 몸통 + 확장된 전체 박스 기준에서 살짝 안쪽만 사용

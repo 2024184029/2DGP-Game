@@ -1,5 +1,6 @@
 # collision_bb.py
 from pico2d import draw_rectangle
+import camera
 
 # 1) 충돌 박스 목록 (left, bottom, right, top)
 OBSTACLES = [
@@ -27,4 +28,8 @@ def can_move(nx, ny, radius=0):
 
 def draw_collision_boxes():
     for left, bottom, right, top in OBSTACLES:
-        draw_rectangle(left, bottom, right, top)
+
+        l, b = camera.world_to_screen(left, bottom)
+        r, t = camera.world_to_screen(right, top)
+
+        draw_rectangle(l, b, r, t)

@@ -1,6 +1,6 @@
 # door.py
 from pico2d import load_image, draw_rectangle
-
+import camera
 
 class Door:
     image = None
@@ -64,10 +64,19 @@ class Door:
         # 현재 프레임 한 칸만 잘라서 그리기
         sx = self.frame * self.w
         sy = 0
+        # Door.image.clip_draw(
+        #     sx, sy,
+        #     self.w, self.h,
+        #     self.x, self.y,
+        #     int(self.w * self.scale),
+        #     int(self.h * self.scale)
+        # )
+
+        draw_x, draw_y = camera.world_to_screen(self.x, self.y)
+
         Door.image.clip_draw(
-            sx, sy,
-            self.w, self.h,
-            self.x, self.y,
+            sx, sy, self.w, self.h,
+            draw_x, draw_y,
             int(self.w * self.scale),
             int(self.h * self.scale)
         )
