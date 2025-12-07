@@ -1,4 +1,5 @@
-from pico2d import load_image
+from pico2d import *
+import camera
 
 CANVAS_WIDTH  = 1500
 CANVAS_HEIGHT = 1000
@@ -8,11 +9,18 @@ class Background:
         # self.image = load_image('background.png')
         self.image = load_image('village.png')
 
+        camera.MAP_W = self.image.w
+        camera.MAP_H = self.image.h
+
     def update(self):
         pass
 
     def draw(self):
-        self.image.draw(CANVAS_WIDTH // 2,
-                        CANVAS_HEIGHT // 2,
-                        CANVAS_WIDTH,
-                        CANVAS_HEIGHT)
+        cw, ch = get_canvas_width(), get_canvas_height()
+
+        self.image.clip_draw_to_origin(
+            camera.window_left,
+            camera.window_bottom,
+            cw, ch,
+            0, 0
+        )

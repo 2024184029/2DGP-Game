@@ -2,6 +2,7 @@ from pico2d import load_image, draw_rectangle
 from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK_UP, SDLK_DOWN
 
 import game_world
+import camera
 from state_machine import StateMachine
 from attack import Attack
 from collision_bb import can_move
@@ -92,16 +93,18 @@ class Idle:
         sx =  col * self.boy.fw
         sy = (FRAME_ROWS - 1 - row) * self.boy.fh
 
+        draw_x, draw_y = camera.world_to_screen(self.boy.x, self.boy.y)
+
         if self.boy.current_dir >= 0:
             self.boy.image.clip_draw(
                 sx, sy, self.boy.fw, self.boy.fh,
-                self.boy.x, self.boy.y
+                draw_x, draw_y
             )
         else:
             self.boy.image.clip_composite_draw(
                 sx, sy, self.boy.fw, self.boy.fh,
                 0, 'h',
-                self.boy.x, self.boy.y,
+                draw_x, draw_y,
                 self.boy.fw, self.boy.fh
             )
 
@@ -172,16 +175,18 @@ class Run:
         sx = col * self.boy.fw
         sy = (FRAME_ROWS - 1 - row) * self.boy.fh
 
+        draw_x, draw_y = camera.world_to_screen(self.boy.x, self.boy.y)
+
         if self.boy.current_dir >= 0:
             self.boy.image.clip_draw(
                 sx, sy, self.boy.fw, self.boy.fh,
-                self.boy.x, self.boy.y
+                draw_x, draw_y
             )
-        else: # face_dir == -1: # left
+        else:  # 왼쪽을 보고 있을 때는 좌우 반전
             self.boy.image.clip_composite_draw(
                 sx, sy, self.boy.fw, self.boy.fh,
                 0, 'h',
-                self.boy.x, self.boy.y,
+                draw_x, draw_y,
                 self.boy.fw, self.boy.fh
             )
 
@@ -221,16 +226,19 @@ class Mission:
         sx = col * self.boy.mfw
         sy = (MISSION_FRAME_ROWS - 1 - row) * self.boy.mfh
 
+
+        draw_x, draw_y = camera.world_to_screen(self.boy.x, self.boy.y)
+
         if self.boy.current_dir >= 0:
             self.boy.mission_image.clip_draw(
                 sx, sy, self.boy.mfw, self.boy.mfh,
-                self.boy.x, self.boy.y
+                draw_x, draw_y
             )
         else:
             self.boy.mission_image.clip_composite_draw(
                 sx, sy, self.boy.mfw, self.boy.mfh,
                 0, 'h',
-                self.boy.x, self.boy.y,
+                draw_x, draw_y,
                 self.boy.mfw, self.boy.mfh
             )
 
@@ -304,14 +312,22 @@ class Boy:
     def draw(self):
         self.state_machine.draw()
 
-        if self.caution_icon:
-            caution_image.draw(self.x, self.y + 50, 80, 80)
+        # 월드 -> 화면
+        draw_x, draw_y = camera.world_to_screen(self.x, self.y)
 
-        # 디버깅용 bb
-        draw_rectangle(*self.get_bb())
+        if self.caution_icon:
+            caution_image.draw(draw_x, draw_y + 50, 80, 80)
+
+        left, bottom, right, top = self.get_bb()
+        bb_left, bb_bottom = camera.world_to_screen(left, bottom)
+        bb_right, bb_top = camera.world_to_screen(right, top)
+        draw_rectangle(bb_left, bb_bottom, bb_right, bb_top)
 
         if self.is_attacking:
-            draw_rectangle(*self.get_attack_bb())
+            a_left, a_bottom, a_right, a_top = self.get_attack_bb()
+            a_left, a_bottom = camera.world_to_screen(a_left, a_bottom)
+            a_right, a_top = camera.world_to_screen(a_right, a_top)
+            draw_rectangle(a_left, a_bottom, a_right, a_top)
 
     @staticmethod
     def get_instance():

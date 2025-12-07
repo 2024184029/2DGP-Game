@@ -1,3 +1,4 @@
+import background
 import game_framework
 import title_mode
 from pico2d import *
@@ -10,6 +11,8 @@ import time
 from mask import Mask
 from door import Door
 from collision_bb import draw_collision_boxes
+import camera
+import court
 
 running = True
 image = None
@@ -46,7 +49,8 @@ def handle_events():
                     d.hit()
 
 def init():
-    background = Background()
+    # background = Background()
+    background = court.Court('village.png')  # 추가된 부분
     game_world.add_object(background, 0)
 
     global boy
@@ -90,6 +94,8 @@ def init():
 
 def update():
     game_world.update()
+    # background.update(boy)
+    # camera.update_camera(boy.x, boy.y) # 보이 위치 기준 카메라 갱신
 
     global start_time, elapsed_time, game_over
 
@@ -178,6 +184,4 @@ def collide(a, b):
 
 def finish():
     game_world.clear()
-
-
 
