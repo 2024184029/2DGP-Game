@@ -184,9 +184,9 @@ def update():
         game_framework.quit()
         return
 
-    # 2분 경과 시 게임 오버
-    if elapsed_time >= 120:
-        game_over = True
+    # # 2분 경과 시 게임 오버
+    # if elapsed_time >= 120:
+    #     game_over = True
 
     # 문이 완전히 열린 문이 하나라도 있으면 RoomMode로 전환
     for d in doors:

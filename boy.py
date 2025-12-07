@@ -343,9 +343,9 @@ class Boy:
 
         if self.current_dir >= 0: # 오른쪽 공격
             attack_left  = right
-            attack_right = right + 60  # 공격 범위
+            attack_right = right + 90  # 공격 범위
         else: # 왼쪽 공격
-            attack_left  = left - 60
+            attack_left  = left - 90
             attack_right = left
 
         attack_bottom = bottom + 10

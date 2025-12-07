@@ -18,7 +18,7 @@ ROW_UP    = 2   # 등(위에서 4번째 줄)
 # 공격 애니메이션이 있는 줄 (위에서 5번째 줄)
 ROW_ATTACK = 1
 
-ATTACK_RANGE = 80    # 공격 유효 범위
+ATTACK_RANGE = 150    # 공격 유효 범위
 
 FRAME_COUNT = 5
 FRAME_W = 200
@@ -38,10 +38,37 @@ class Zombie:
         self.w = self.image.w // self.cols
         self.h = self.image.h // self.rows
 
-        # 시작 위치 랜덤
-        self.x, self.y = randint(100, 1000), randint(100, 1000)
-        dx, dy = choice([(1, 0), (-1, 0), (0, 1), (0, -1)]) # 시작 4방향 중 하나 (오, 왼, 위, 아래)
+        # 시작 위치 랜덤 (집 바운딩박스 안/틈 사이에 끼지 않도록 필터링)
+        spawn_radius = 25  # can_move의 radius
+        tries = 0
+
+        while True:
+            tries += 1
+
+            # 기본 랜덤 범위
+            self.x, self.y = randint(100, 1000), randint(100, 1000)
+
+            # 1) 현재 위치 자체가 집 바운딩박스랑 겹치면 버림
+            if not can_move(self.x, self.y, radius=spawn_radius):
+                continue
+
+            # 2) 사방으로 조금씩 움직였을 때 최소 한 방향은 움직일 수 있어야 함
+            free_dirs = 0
+            for dx, dy in [(30, 0), (-30, 0), (0, 30), (0, -30)]:
+                if can_move(self.x + dx, self.y + dy, radius=spawn_radius):
+                    free_dirs += 1
+
+            # 최소 한 방향 이상
+            if free_dirs > 0:
+                break
+
+            if tries > 50:
+                break
+
+        # 시작 방향은 랜덤 4방향 중 하나
+        dx, dy = choice([(1, 0), (-1, 0), (0, 1), (0, -1)])  # 시작 4방향 중 하나 (오, 왼, 위, 아래)
         self.vx, self.vy = dx * SPEED, dy * SPEED
+
         
         self.row = ROW_DOWN # 시작은 정면 방향
         self.dir = 1
