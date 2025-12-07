@@ -8,6 +8,7 @@ import game_world
 from zombie import Zombie
 from enemies import Corn, Snail, Bug
 import time
+import mask
 from mask import Mask
 from door import Door
 from collision_bb import draw_collision_boxes
@@ -30,7 +31,7 @@ key_door_index = -1
 has_master_key = False
 
 # EXIT 문 / 게임클리어 관련
-EXIT_X, EXIT_Y = 1030, 430  # 마을에서 exit 문 위치 (월드 좌표)
+EXIT_X, EXIT_Y = 1050, 430  # 마을에서 exit 문 위치 (월드 좌표)
 
 exit_image = None
 exit_active = False          # 키 가져오고 마을로 돌아오면 True
@@ -42,7 +43,7 @@ exit_frame_delay = 20         # 숫자 클수록 느리게
 exit_playing = False         # 플레이어가 문 앞에 서서 애니메이션 재생 중인지
 boy_removed = False          # 애니메이션 끝나고 플레이어 삭제했는지
 
-DOOR_SCALE = 0.7             # 문 크기 줄이기
+DOOR_SCALE = 0.6             # 문 크기 줄이기
 
 gameclear_image = None
 game_cleared = False
@@ -97,9 +98,12 @@ def init():
     for e in enemies:
         game_world.add_object(e, 1)
 
+    import mask as mask_module
     global mask
     mask = Mask(boy)
     game_world.add_object(mask, 3)
+    # 시야 레벨 초기화 (마을 시작할 때 항상 1단계부터)
+    mask_module.reset_mask_level()   # 시야 레벨 초기화
 
     global doors, key_door_index
     doors = []
@@ -291,10 +295,13 @@ def handle_attack_collision():
 
     attack_bb = boy.get_attack_bb()
     # 공격 당하면 제거됨 (나중에 체력 깎는 걸로 수정하기)
+    import mask as mask_module
     for e in enemies[:]:
         if collide(attack_bb, e.get_bb()):
             game_world.remove_object(e)
             enemies.remove(e)
+            # 적 하나 죽일 때마다 시야를 한 단계 넓힘
+            mask_module.increase_mask_level()
 
     # for d in doors:
     #     if not d.is_open and collide(attack_bb, d.get_bb()):
