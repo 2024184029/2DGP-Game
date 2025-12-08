@@ -1,11 +1,9 @@
 # camera.py
 from pico2d import get_canvas_width, get_canvas_height
 
-# 맵(배경) 전체 크기
 MAP_W = 1500
 MAP_H = 1000
 
-# 카메라 민감도
 CAMERA_SENS = 1.0
 
 window_left = 0

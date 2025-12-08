@@ -14,9 +14,9 @@ def init():
     global heart_image, gameover_image, hearts, game_over, _game_over_time
 
     if heart_image is None:
-        heart_image = load_image('heart.png')      # 네 하트 이미지 이름
+        heart_image = load_image('heart.png')
     if gameover_image is None:
-        gameover_image = load_image('gameover.png')  # 게임오버 이미지 이름
+        gameover_image = load_image('gameover.png')
 
     hearts = HEART_MAX
     game_over = False
@@ -28,8 +28,8 @@ def draw_hearts():
         return
 
     for i in range(hearts):
-        x = 80 + i * 80   # 하트 간격
-        y = 900           # 위쪽에 고정
+        x = 80 + i * 80
+        y = 900
         heart_image.draw(x, y, 60, 60)
 
 
@@ -60,5 +60,4 @@ def is_game_over():
 def should_quit():
     if not game_over:
         return False
-    # 5초 후 종료
-    return (get_time() - _game_over_time) > 5.0
+    return (get_time() - _game_over_time) > 3.0

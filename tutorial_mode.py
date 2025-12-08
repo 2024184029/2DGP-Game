@@ -1,6 +1,6 @@
 from pico2d import *
 import game_framework
-import play_mode   # 튜토리얼 끝나면 여기로 넘어감
+import play_mode
 
 image = None
 font = None
@@ -35,7 +35,7 @@ def update():
 
 def draw():
     clear_canvas()
-    image.draw(750, 500)  # 튜토리얼 이미지 중앙
+    image.draw(750, 500)
     font.draw(620, 100, "PRESS SPACE OR CLICK TO START GAME", (255, 255, 255))
     update_canvas()
 

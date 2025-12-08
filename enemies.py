@@ -8,9 +8,9 @@ FRAME_ROWS = 4
 FRAME_W = 100
 FRAME_H = 100
 
-DEFAULT_SPEED = 0.10           # 기본 이동 속도
-DEFAULT_MOVE_RADIUS = 30       # 중심에서 이동 거리
-DEFAULT_FRAME_DELAY = 15        # 기본 프레임 유지 횟수
+DEFAULT_SPEED = 0.10
+DEFAULT_MOVE_RADIUS = 30
+DEFAULT_FRAME_DELAY = 15
 
 class Enemies:
     def __init__(self, image_file, x, y,
@@ -20,9 +20,9 @@ class Enemies:
 
         self.image = load_image(image_file)
         self.x, self.y = x, y
-        self.origin_x, self.origin_y = x, y    # 중심 좌표 저장
+        self.origin_x, self.origin_y = x, y
 
-        self.move_radius = move_radius # 움직일 반경
+        self.move_radius = move_radius
         self.speed = speed
         self.frame_delay = frame_delay
 
@@ -35,20 +35,17 @@ class Enemies:
         self.frame_count = self.cols * self.rows   # 8프레임
         self.frame_hold = 0
 
-        # 처음 방향은 랜덤
         dx, dy = choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
         self.vx, self.vy = dx * self.speed, dy * self.speed
 
-        # 방향 전환
         self.next_turn = get_time() + 1.5
 
-        self.scale = 1.0  # 나중에 크기 조절용
+        self.scale = 1.0
 
     def update(self):
         self.x += self.vx
         self.y += self.vy
 
-        # 중심에서 move_radius 벗어나면 튕겨나오기
         if self.x < self.origin_x - self.move_radius: # 좌 우
             self.x = self.origin_x - self.move_radius
             self.vx = -self.vx
@@ -63,14 +60,12 @@ class Enemies:
             self.y = self.origin_y + self.move_radius
             self.vy = -self.vy
 
-        # 일정 시간마다 방향 전환
         t = get_time()
         if t >= self.next_turn:
             dx, dy = choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
             self.vx, self.vy = dx * self.speed, dy * self.speed
             self.next_turn = t + 2.0
 
-        # 프레임 속도 조절
         self.frame_hold += 0.5
 
         if self.frame_hold >= self.frame_delay:
@@ -78,26 +73,22 @@ class Enemies:
             self.frame = (self.frame + 1) % self.frame_count
 
     def draw(self):
-        # frame을 col row로 변환
         col = self.frame % self.cols
         row = self.frame // self.cols
 
         scale = 0.5
 
         sx = col * self.fw
-        sy = (self.rows - 1 - row) * self.fh  # 위/아래 뒤집기
+        sy = (self.rows - 1 - row) * self.fh
 
-        # 월드 -> 화면 좌표 변환
         draw_x, draw_y = camera.world_to_screen(self.x, self.y)
 
-        # 화면 기준으로 그리기
         self.image.clip_draw(
             sx, sy, self.fw, self.fh,
             draw_x, draw_y,
             self.fw * scale, self.fh * scale
         )
 
-        # 디버그용 BB도 카메라 기준으로
         left, bottom, right, top = self.get_bb()  # 월드 좌표
         l, b = camera.world_to_screen(left, bottom)
         r, t = camera.world_to_screen(right, top)

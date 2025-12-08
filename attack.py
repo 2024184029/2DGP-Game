@@ -5,7 +5,7 @@ import camera
 attack_image = None
 
 ATTACK_FRAMES = [
-    (4,   0, 104, 200),     # left, bottom, width, height
+    (4,   0, 104, 200),
     (117, 0, 204, 200),
     (329, 0, 192, 200),
     (529, 0, 105, 200),
@@ -21,15 +21,14 @@ class Attack:
 
         self.image = attack_image
         self.x, self.y = x, y
-        self.dir = dir          # 1 R, -1 L
+        self.dir = dir
 
         self.frame = 0
         self.frame_hold = 0
-        self.frame_delay = 30    # 프레임 전환 속도
-        self.scale = 0.3        # 폭발 크기
+        self.frame_delay = 30
+        self.scale = 0.3
 
     def update(self):
-        # 프레임 진행
         self.frame_hold += 1
         if self.frame_hold >= self.frame_delay:
             self.frame_hold = 0
@@ -48,13 +47,13 @@ class Attack:
 
         screen_x, screen_y = camera.world_to_screen(self.x, self.y)
 
-        if self.dir >= 0:  # 오른쪽 공격
+        if self.dir >= 0:
             draw_x = screen_x + dw * 1.3
             self.image.clip_draw(
                 sx, sy, sw, sh,
                 draw_x, screen_y, dw, dh
             )
-        else:  # 왼쪽 공격
+        else:
             draw_x = screen_x - dw * 1.3
             self.image.clip_composite_draw(
                 sx, sy, sw, sh,

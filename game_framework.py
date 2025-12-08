@@ -1,8 +1,6 @@
 running = None
 stack = None
 
-# 게임 모드들을 연결 (로고와 로고 사이)
-
 def change_mode(mode):
     global stack
     if (len(stack) > 0):

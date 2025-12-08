@@ -1,4 +1,4 @@
-DEBUG_BT = False   # 콘솔에 로그 출력
+DEBUG_BT = False
 
 level = 0
 def indent():
@@ -94,13 +94,6 @@ class Selector(Node):
 
 
 
-
-
-
-
-
-
-
 class Sequence(Node):
     def __init__(self, name, *nodes):
         self.children = list(nodes)
@@ -160,11 +153,6 @@ class Action(Node):
     def run(self):
         self.value = self.func(*self.args)
         return self.value
-
-
-    # @Node.show_result
-    # def monitor_run(self):
-    #     return self.result, 'no change' # monitor run 시에는 기존 실행 결과를 재활용.
 
 
 class Condition(Node):

@@ -7,15 +7,12 @@ from state_machine import StateMachine
 from attack import Attack
 from collision_bb import can_move
 
-
-# 캐릭터 스프라이트 정보
 FRAME_COLS = 5
 FRAME_ROWS = 3
-IDLE_ROW = 0           # Idle 프레임이 있는 행
-RUN_ROW  = 1           # Run 프레임이 있는 행
+IDLE_ROW = 0
+RUN_ROW  = 1
 SPEED = 0.3
 
-# 실제 시트가 있는 칸만 사용하도록 설정
 IDLE_FRAMES = [(0,0), (0,1), (0,2), (0,3)]
 
 RUN_FRAMES = [
@@ -37,7 +34,6 @@ caution_image = None
 def space_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_SPACE
 
-# time_out = lambda e: e[0] == 'TIMEOUT'
 def right_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_RIGHT
 
@@ -136,10 +132,8 @@ class Run:
             self.frame_hold = 0
             self.boy.frame = (self.boy.frame + 1) % len(RUN_FRAMES)
 
-        # 1) 현재 위치
         x, y = self.boy.x, self.boy.y
 
-        # 2) 이동량 계산
         SPEED = 0.3
         if self.boy.dx != 0 and self.boy.dy != 0:
             dx = (self.boy.dx * SPEED) / 1.5
@@ -151,20 +145,14 @@ class Run:
         nx = x + dx
         ny = y + dy
 
-        # 3) 화면 경계
         W, H = 1500, 1000
         half_w, half_h = self.boy.fw // 2, self.boy.fh // 2
         nx = max(half_w, min(nx, W - half_w))
         ny = max(half_h, min(ny, H - half_h))
 
-        # 4) 바운딩박스 충돌
-        # 캐릭터 반지름 20짜리 원
         if can_move(nx, ny, radius=20):
             self.boy.x, self.boy.y = nx, ny
-        # else: 막혀있으면 제자리
 
-
-        # 정지하면 IDLE 상태로 전환
         if self.boy.dx == 0 and self.boy.dy == 0:
             self.boy.state_machine.handle_state_event(('STOP', None))
 
@@ -182,7 +170,7 @@ class Run:
                 sx, sy, self.boy.fw, self.boy.fh,
                 draw_x, draw_y
             )
-        else:  # 왼쪽을 보고 있을 때는 좌우 반전
+        else:
             self.boy.image.clip_composite_draw(
                 sx, sy, self.boy.fw, self.boy.fh,
                 0, 'h',
@@ -203,13 +191,12 @@ class Mission:
         self.boy.is_attacking = True
 
         attack = Attack(self.boy.x, self.boy.y, self.boy.current_dir)
-        game_world.add_object(attack, 2)  # 레이어는 상황에 맞게
+        game_world.add_object(attack, 2)
 
     def exit(self, e):
         self.boy.is_attacking = False
 
     def do(self):
-        # self.boy.mission_frame += 1
         self.frame_hold += 1
 
         if self.frame_hold >= 25:
@@ -249,7 +236,7 @@ class Boy:
         self.frame = 0
         self.scale = 1.0
 
-        self.dx = 0 # 이동상태
+        self.dx = 0
         self.dy = 0
         self.current_dir = 1
         self.image = load_image('boy.png')
@@ -261,13 +248,12 @@ class Boy:
         self.mfw = self.mission_image.w // MISSION_FRAME_COLS
         self.mfh = self.mission_image.h // MISSION_FRAME_ROWS
         self.mission_frame = 0
-        self.is_attacking = False # 미션 중인지 여부
-
+        self.is_attacking = False
         self.IDLE = Idle(self)
         self.RUN = Run(self)
         self.MISSION = Mission(self)
 
-        self.caution_icon = False   # 주의 아이콘
+        self.caution_icon = False
         global caution_image
         if caution_image is None:
             caution_image = load_image('caution.png')
@@ -312,7 +298,6 @@ class Boy:
     def draw(self):
         self.state_machine.draw()
 
-        # 월드 -> 화면
         draw_x, draw_y = camera.world_to_screen(self.x, self.y)
 
         if self.caution_icon:
@@ -341,10 +326,10 @@ class Boy:
     def get_attack_bb(self):
         left, bottom, right, top = self.get_bb()
 
-        if self.current_dir >= 0: # 오른쪽 공격
+        if self.current_dir >= 0:
             attack_left  = right
-            attack_right = right + 90  # 공격 범위
-        else: # 왼쪽 공격
+            attack_right = right + 90
+        else:
             attack_left  = left - 90
             attack_right = left
 
