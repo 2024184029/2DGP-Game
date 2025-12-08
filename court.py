@@ -6,6 +6,11 @@ class Court:
     def __init__(self, image_path='village.png'):
         self.image = load_image(image_path)
 
+        # 마을 배경 음악 로딩 & 재생
+        self.bgm = load_music('village.ogg')
+        self.bgm.set_volume(32)
+        self.bgm.repeat_play()
+
         # 전체 맵 크기
         self.w = self.image.w
         self.h = self.image.h

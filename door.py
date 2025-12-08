@@ -1,13 +1,19 @@
 # door.py
-from pico2d import load_image, draw_rectangle
+from pico2d import load_image, draw_rectangle,  load_wav
 import camera
 
 class Door:
     image = None
+    open_sound = None
 
     def __init__(self, x, y):
         if Door.image is None:
             Door.image = load_image('door.png')
+
+        # 사운드 로딩
+        if Door.open_sound is None:
+            Door.open_sound = load_wav('door_open.ogg')
+            Door.open_sound.set_volume(32)
 
         self.x = x
         self.y = y
@@ -52,6 +58,9 @@ class Door:
     def hit(self):
         if self.is_open:
             return
+
+        if Door.open_sound:
+            Door.open_sound.play()
 
         self.frame += 1
         print("Door hit. frame =", self.frame)

@@ -9,6 +9,11 @@ class Background:
         # self.image = load_image('background.png')
         self.image = load_image('village.png')
 
+        # 마을 배경 음악 로딩 & 재생
+        self.bgm = load_music('village.ogg')
+        self.bgm.set_volume(32)
+        self.bgm.repeat_play()
+
         camera.MAP_W = self.image.w
         camera.MAP_H = self.image.h
 

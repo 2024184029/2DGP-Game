@@ -27,12 +27,19 @@ FRAME_H = 200
 SPEED = 0.15
 
 class Zombie:
+    hit_sound = None
+
     def __init__(self, boy):
         self.image = load_image('zombie_b.png')
         self.frame = 0
         self.scale = 1.0
         self.scale = 0.6
         self.frame_hold = 0
+
+        # 사운드 로딩
+        if Zombie.hit_sound is None:
+            Zombie.hit_sound = load_wav('zombie_hit.wav')
+            Zombie.hit_sound.set_volume(32)
 
         # 새 스프라이트 시트 정보 (5x7)
         self.cols, self.rows = 5, 7
@@ -291,6 +298,11 @@ class Zombie:
             now = get_time()
             # 마지막 공격 후 쿨타임이 지났으면 데미지 1
             if now - self.last_attack_time >= self.attack_cooltime:
+
+                # 좀비 공격 사운드
+                if Zombie.hit_sound:
+                    Zombie.hit_sound.play()
+
                 ui_life.take_damage(1)       # ← 하트 1개 감소
                 self.last_attack_time = now  # 시간 갱신
 

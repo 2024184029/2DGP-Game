@@ -25,6 +25,8 @@ elapsed_time = 0
 game_over = False
 font = None # 시간 출력 폰트
 
+enemy_die_sound = None # 적 사망 효과음
+
 doors = []
 key_door_index = -1
 # room에서 키를 먹었는지 여부
@@ -153,6 +155,11 @@ def init():
 
     game_cleared = False
     gameclear_start_time = 0.0
+
+    # 적 사운드 로딩
+    global enemy_die_sound
+    enemy_die_sound = load_wav('enemy_die.wav')
+    enemy_die_sound.set_volume(32)
 
 def update():
     game_world.update()
@@ -294,6 +301,10 @@ def handle_attack_collision():
     import mask as mask_module
     for e in enemies[:]:
         if collide(attack_bb, e.get_bb()):
+            # 사운드 재생
+            if enemy_die_sound:
+                enemy_die_sound.play()
+
             game_world.remove_object(e)
             enemies.remove(e)
             # 적 하나 죽일 때마다 시야를 한 단계 넓힘
