@@ -36,7 +36,7 @@ def update():
 def draw():
     clear_canvas()
     image.draw(750, 500)  # 튜토리얼 이미지 중앙
-    font.draw(400, 100, "PRESS SPACE OR CLICK TO START GAME", (255, 255, 255))
+    font.draw(620, 100, "PRESS SPACE OR CLICK TO START GAME", (255, 255, 255))
     update_canvas()
 
 def handle_events():
