@@ -101,7 +101,7 @@ class Enemies:
         left, bottom, right, top = self.get_bb()  # 월드 좌표
         l, b = camera.world_to_screen(left, bottom)
         r, t = camera.world_to_screen(right, top)
-        draw_rectangle(l, b, r, t)
+        # draw_rectangle(l, b, r, t)
 
     def get_bb(self):
         half_w = self.fw * 0.3

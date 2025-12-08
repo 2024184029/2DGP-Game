@@ -321,13 +321,13 @@ class Boy:
         left, bottom, right, top = self.get_bb()
         bb_left, bb_bottom = camera.world_to_screen(left, bottom)
         bb_right, bb_top = camera.world_to_screen(right, top)
-        draw_rectangle(bb_left, bb_bottom, bb_right, bb_top)
+        # draw_rectangle(bb_left, bb_bottom, bb_right, bb_top)
 
         if self.is_attacking:
             a_left, a_bottom, a_right, a_top = self.get_attack_bb()
             a_left, a_bottom = camera.world_to_screen(a_left, a_bottom)
             a_right, a_top = camera.world_to_screen(a_right, a_top)
-            draw_rectangle(a_left, a_bottom, a_right, a_top)
+            # draw_rectangle(a_left, a_bottom, a_right, a_top)
 
     @staticmethod
     def get_instance():

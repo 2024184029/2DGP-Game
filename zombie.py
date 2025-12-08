@@ -157,7 +157,7 @@ class Zombie:
         left, bottom, right, top = self.get_bb()  # 여기까지는 월드 좌표
         l, b = camera.world_to_screen(left, bottom)
         r, t = camera.world_to_screen(right, top)
-        draw_rectangle(l, b, r, t)
+        # draw_rectangle(l, b, r, t)
 
     # 충돌 처리
     def get_bb(self):
@@ -247,8 +247,8 @@ class Zombie:
         dist = math.sqrt(dx * dx + dy * dy) + 1e-6
 
         # Boy 방향으로
-        self.vx = (dx / dist) * SPEED * 1.7  # 추적할 때 더 빠르게
-        self.vy = (dy / dist) * SPEED * 1.7
+        self.vx = (dx / dist) * SPEED * 1.6  # 추적할 때 더 빠르게
+        self.vy = (dy / dist) * SPEED * 1.6
         self.update_row_from_velocity()
         return BehaviorTree.RUNNING
 
@@ -305,7 +305,7 @@ class Zombie:
         attack = Sequence('근접하면 공격', c_boy_attack, a_attack)
 
         # Boy가 가까이 있는지 (7m 정도)
-        c_boy_near = Condition('플레이어가 가까운가?', self.is_boy_near, 200)
+        c_boy_near = Condition('플레이어가 가까운가?', self.is_boy_near, 270)
 
         # 가까우면 chase_boy
         a_chase = Action('플레이어 추적', self.chase_boy)

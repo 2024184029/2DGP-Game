@@ -184,10 +184,6 @@ def update():
         game_framework.quit()
         return
 
-    # # 2분 경과 시 게임 오버
-    # if elapsed_time >= 120:
-    #     game_over = True
-
     # 문이 완전히 열린 문이 하나라도 있으면 RoomMode로 전환
     for d in doors:
         if d.is_open and not d.entered_room:
@@ -217,7 +213,7 @@ def update_exit_and_clear():
 
     # 이미 클리어 상태라면, 일정 시간 뒤 게임 종료
     if game_cleared:
-        if time.time() - gameclear_start_time > 2.0:
+        if time.time() - gameclear_start_time > 3.0:
             game_framework.quit()
         return
 
