@@ -76,7 +76,7 @@ class Zombie:
         self.face_dir = 'down'
 
         self.is_attacking = False
-
+        self.next_turn = get_time() + 2.0
 
         self.boy = boy
 
