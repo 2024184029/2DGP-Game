@@ -4,6 +4,7 @@ import play_mode
 
 image = None
 font = None
+intro_bgm = None
 
 def pause():
     pass
@@ -12,15 +13,24 @@ def resume():
     pass
 
 def init():
-    global image, font
+    global image, font, intro_bgm
     image = load_image('title.png')
     font = load_font('D2Coding.ttc', 15)
+
+    intro_bgm = load_music('intro.ogg')
+    intro_bgm.set_volume(40)
+    intro_bgm.repeat_play()
 
 
 def finish():
     global image
     if image is not None:
         del image # 메모리 소멸
+
+def exit():
+    global intro_bgm
+    if intro_bgm:
+        intro_bgm.stop()
 
 def update():
     pass
