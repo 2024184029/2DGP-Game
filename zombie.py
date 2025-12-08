@@ -254,8 +254,8 @@ class Zombie:
         dist = math.sqrt(dx * dx + dy * dy) + 1e-6
 
         # Boy 방향으로
-        self.vx = (dx / dist) * SPEED * 1.6  # 추적할 때 더 빠르게
-        self.vy = (dy / dist) * SPEED * 1.6
+        self.vx = (dx / dist) * SPEED * 1.4  # 추적할 때 더 빠르게
+        self.vy = (dy / dist) * SPEED * 1.4
         self.update_row_from_velocity()
         return BehaviorTree.RUNNING
 

@@ -75,7 +75,7 @@ class RoomPlayer:
         # 아주 간단한 프레임 애니메이션 (걸을 때만)
         if self.dx != 0 or self.dy != 0:
             self.frame_hold += 1
-            if self.frame_hold >= 8:
+            if self.frame_hold >= 30:
                 self.frame_hold = 0
                 # 대충 RUN 행에 있는 프레임 범위 안에서만 돈다고 가정
                 self.frame = (self.frame + 1) % 4
@@ -150,7 +150,6 @@ class Key:
         self.pick_radius = 70
 
     def update(self):
-        # 프레임 천천히 넘기기 (frame_hold값 바꾸면서 속도 조절)
         self.frame_hold += 1
         if self.frame_hold >= self.frame_delay:
             self.frame_hold = 0
