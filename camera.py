@@ -1,4 +1,3 @@
-# camera.py
 from pico2d import get_canvas_width, get_canvas_height
 
 MAP_W = 1500

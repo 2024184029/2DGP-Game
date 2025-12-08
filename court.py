@@ -1,4 +1,3 @@
-# court.py
 from pico2d import *
 import camera
 
